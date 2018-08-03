@@ -2,7 +2,8 @@
 DROP TABLE IF EXISTS graphs, edges, nodes CASCADE;
 
 CREATE TABLE graphs (
-    ID SERIAL PRIMARY KEY
+    ID SERIAL PRIMARY KEY,
+    name VARCHAR(40)
 );
 
 CREATE TABLE nodes (

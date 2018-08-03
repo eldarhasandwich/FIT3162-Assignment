@@ -9,6 +9,8 @@ For windows installation, visit [THIS LINK](https://www.riverbankcomputing.com/s
 
 ## Database Junk
 
+http://initd.org/psycopg/docs/usage.html
+
 Start the DB
 ```
 sudo service postgresql start
