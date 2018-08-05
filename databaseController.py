@@ -12,6 +12,7 @@ def RunQuery (qString):
 def CreateNewGraph (newName):
     cur = conn.cursor()
     cur.execute("INSERT INTO graphs (name) VALUES ('" + newName + "');")
+    # print(cur.fetchall())
     conn.commit()
     cur.close()
 
