@@ -1,7 +1,7 @@
 
 import psycopg2
 
-conn = psycopg2.connect("dbname=snagraphs user=eldarhasandwich")
+conn = psycopg2.connect("dbname=testsnagraphs user=eldarhasandwich")
 
 def RunQuery (qString):
     cur = conn.cursor()
@@ -17,12 +17,15 @@ def CreateNewGraph (newName):
 
 def CreateNewNode (graphID, data):
     cur = conn.cursor()
-    cur.execute("INSERT INTO nodes (email, graph_ID) VALUES ('%s', %s)", (data, graphID))
+    cur.execute("INSERT INTO nodes (email, graph_ID) VALUES (%s, %s)", (data, graphID))
     conn.commit()
     cur.close()
     
 def CreateNewEdge (senderID, recipientID, data):
-    pass
+    cur = conn.cursor()
+    cur.execute("INSERT INTO edges (sender_ID, recipient_ID, email_count) VALUES (%s, %s)", (senderID, recipientID, data))
+    conn.commit()
+    cur.close()
 
 def UpdateEdgeData (edgeID, data):
     pass
@@ -30,4 +33,7 @@ def UpdateEdgeData (edgeID, data):
 
 CreateNewGraph("HELLO")
 CreateNewGraph("this is a graph")
+CreateNewNode(1, "eldar")
 RunQuery("SELECT * FROM graphs")
+RunQuery("SELECT * FROM nodes")
+RunQuery("SELECT * FROM edges")
