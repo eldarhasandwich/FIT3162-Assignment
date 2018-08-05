@@ -48,8 +48,8 @@ class AdjacencyMatrix:
                 output.write("WERE SENT FROM: " + sender)
                 output.write("\n")
                 output.write("\n")
-            sender_node = Node(sender, edges)
-            self.nodes.append(sender_node)
+                sender_node = Node(sender, edges)
+                self.nodes.append(sender_node)
 
 
 
@@ -63,8 +63,8 @@ class FileProcessor:
         file_count = 0
         file_limit = 5000
         for dir_name, subdir, file_list in os.walk(self.directory):
-            if file_count > file_limit:
-                break
+            #if file_count > file_limit:
+                #break
             if "sent" in dir_name:
                 for file_name in file_list:
                     file_count += 1
@@ -125,9 +125,13 @@ class Node:
     def toString(self):
         return str(self.email)
 
-    def edges_as_strings(self):
+    def edges_as_string(self):
+        all_edges = ""
         for edge in self.edges:
             print(edge)
+            edge_str = str(edge)[0]+": "+str(edge[1]+", ")
+            all_edges += edge_str
+        return all_edges
 
 
 
@@ -138,12 +142,7 @@ adj_matrix = file_processor.process_all_files_in_directory()
 adj_matrix.write_data_to_textfile()
 for node in adj_matrix.nodes:
     print(node.toString())
-    node.edges_as_strings()
-    break
-
-
-
-
+    #print(node.edges_as_string())
 
 
 
