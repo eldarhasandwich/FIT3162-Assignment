@@ -1,0 +1,11 @@
+4: b@b.b
+1: c@c.c
+WERE SENT FROM: a@a.a
+
+1: a@a.a
+1: c@c.c
+WERE SENT FROM: b@b.b
+
+1: b@b.b
+WERE SENT FROM: c@c.c
+

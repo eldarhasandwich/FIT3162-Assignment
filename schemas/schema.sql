@@ -16,6 +16,7 @@ CREATE TABLE edges (
     ID SERIAL PRIMARY KEY,
     sender_ID INT REFERENCES nodes(ID),
     recipient_ID INT REFERENCES nodes(ID),
+    graph_ID INT REFERENCES graphs(ID),
     email_count INT
 );
 
