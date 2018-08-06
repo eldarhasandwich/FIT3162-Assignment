@@ -33,10 +33,10 @@ class AdjacencyList:
                 for key, recipient in sender.recipients.items():
                     if recipient.id == _recipientID:
                         recipient.UpdateEmailCount(recipient.emailCount + 1)
-                        break
+                        return
                     else: pass
                 sender.AddRecipient(_recipientID, _recipientAddress, 1)
-                break
+                return
             else: pass
 
         newSender = Sender(_senderID, _senderAddress)
