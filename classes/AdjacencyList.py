@@ -16,7 +16,7 @@ class Sender:
 
     def AddRecipient(self, recipientID, recipientAddress, emailCount):
         newRecipient = Recipient(recipientID, recipientAddress, emailCount)
-        self.recipients.append(newRecipient)
+        self.recipients[str(recipientID)] = newRecipient
 
 class AdjacencyList:
     def __init__(self):
@@ -41,10 +41,10 @@ class AdjacencyList:
 
         newSender = Sender(_senderID, _senderAddress)
         newRecipient = Recipient(_recipientID, _recipientAddress, 1)
-        newSender[str(recipientAddress)] = newRecipient
+        newSender.recipients[str(_recipientAddress)] = newRecipient
         self.senders[str(_senderID)] = newSender
 
-        print(self.senders)
+        # print(self.senders)
 
     
 

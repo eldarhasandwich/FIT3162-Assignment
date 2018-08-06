@@ -71,6 +71,26 @@ def PullMatrixFromDB (graphID):
         print(sender, receiver)
     matrix.write_data_to_textfile()        
 
+def PullListFromDB (graphID):
+    graphID = str(graphID) #Typeerror without this line
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM nodes WHERE graph_ID = %s", (graphID))
+    nodes = cur.fetchall()
+    cur.execute("SELECT * FROM edges WHERE graph_ID = %s", (graphID))
+    edges = cur.fetchall()
+    cur.close()
 
+    print("Nodes:")
+    for n in nodes: print(n)
+    print("Edges:")
+    for e in edges: print(e)
 
-PullMatrixFromDB(1)
+    adjList = AdjacencyList()
+    for e in edges:
+        sender = filter(lambda x : x[0] == e[1], nodes)[0]
+        receiver = filter(lambda x : x[0] == e[2], nodes)[0]
+
+        adjList.AddSenderRecipientPair(e[1], sender[1], e[2], receiver[1])
+
+# PullMatrixFromDB(1)
+PullListFromDB(1)
