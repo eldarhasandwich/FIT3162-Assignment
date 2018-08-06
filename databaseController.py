@@ -1,6 +1,7 @@
 
 import psycopg2
 from classes.AdjacencyMatrix import *
+from classes.AdjacencyList import *
 
 conn = psycopg2.connect("dbname=testsnagraphs user=eldarhasandwich")
 
@@ -54,6 +55,7 @@ def PullMatrixFromDB (graphID):
     nodes = cur.fetchall()
     cur.execute("SELECT * FROM edges WHERE graph_ID = %s", (graphID))
     edges = cur.fetchall()
+    cur.close()
 
     print("Nodes:")
     for n in nodes: print(n)
@@ -61,13 +63,14 @@ def PullMatrixFromDB (graphID):
     for e in edges: print(e)
 
     matrix = AdjacencyMatrix()
-    for e in edges:
+    for e in edges: # this is why python is an abomination
         sender = filter(lambda x : x[0] == e[1], nodes)[0][1]
         receiver = filter(lambda x : x[0] == e[2], nodes)[0][1]
 
         matrix.add(sender, receiver)
         print(sender, receiver)
     matrix.write_data_to_textfile()        
+
 
 
 PullMatrixFromDB(1)

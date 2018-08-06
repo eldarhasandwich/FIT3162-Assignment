@@ -4,7 +4,7 @@ class AdjacencyMatrix:
         self.keys = {}
         self.vals = {}
         self.c = 0
-        self.elements = [[0 for _ in range(10000)] for _ in range(10000)]
+        self.elements = [[0 for _ in range(10000)] for _ in range(10000)] # generating this at runtime is really poop, maybe we should just use adjacency list
         self.nodes = []
         self.output_file = "test.txt"
 
