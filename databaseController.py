@@ -1,7 +1,9 @@
 
 import psycopg2
-from classes.AdjacencyMatrix import *
-from classes.AdjacencyList import *
+# from classes.AdjacencyMatrix import *
+# from classes.AdjacencyList import *
+import classes.AdjacencyList as AL
+import enron_output_to_adjlist as enron
 
 conn = psycopg2.connect("dbname=testsnagraphs user=eldar")
 
@@ -67,6 +69,7 @@ def READ_AllGraphs ():
     cur.close()
     return value
 
+# returns array of all nodes in a given graph
 def READ_NodesInGraph (graphID):
     cur = conn.cursor()
     cur.execute("SELECT * FROM nodes WHERE graph_ID = %s", (graphID))
@@ -74,6 +77,7 @@ def READ_NodesInGraph (graphID):
     cur.close()
     return value
 
+# returns array of all edges in a given graph
 def READ_EdgesInGraph (graphID):
     cur = conn.cursor()
     cur.execute("SELECT * FROM edges WHERE graph_ID = %s", (graphID))
@@ -94,7 +98,7 @@ def PullListFromDB (graphID):
     nodes = READ_NodesInGraph(graphID)
     edges = READ_EdgesInGraph(graphID)
 
-    adjList = AdjacencyList()
+    adjList = AL.AdjacencyList()
     for e in edges:
         senderID = e[1]
         receiverID = e[2]
@@ -137,8 +141,5 @@ def PushListToDB (graphID, _AdjacencyList):
 
 
 if __name__ == "__main__":
-    adjList = PullListFromDB(1)
+    adjList = enron.EnronOutputToAdjList()
     PushListToDB(1, adjList)
-
-    # print(CreateNewGraph("heyA"))
-    print(READ_AllGraphs())

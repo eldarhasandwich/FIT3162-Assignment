@@ -1,6 +1,4 @@
 
-# from databaseController import *
-
 class Recipient:
     def __init__(self, _id, _emailAddress, _emailCount):
         self.id = _id
@@ -24,6 +22,9 @@ class AdjacencyList:
     def __init__(self):
         self.senders = {}
 
+    # _value, _incrementValue: The use of value depends on if incrementValue is true or false.
+    # if it is TRUE, value will be ADDED to the recipients emailcount if this recipient exists within the sender
+    # if it is FALSE, value will REPLACE the recipients emailcount
     def AddSenderRecipientPair(self, _senderID, _senderAddress, _recipientID, _recipientAddress, _value = 1, _incrementValue = True):
         for key, sender in self.senders.items():
             if sender.id == _senderID:
