@@ -97,24 +97,27 @@ def PullListFromDB (graphID):
     return adjList
 
 def PushListToDB (graphID, _AdjacencyList):
-    nodeList = {}
-    edgeList = {}
+    nodeDict = {}
+    edgeArr = []
 
     for key, sender in _AdjacencyList.senders.items():
-        if key not in nodeList:
-            nodeList[key] = sender.emailAddress
+        if key not in nodeDict:
+            nodeDict[key] = sender.emailAddress
         else: pass
         for key, recipient in sender.recipients.items():
             # print("r_key", key)
             # print("r_obj", recipient.emailAddress)
-            if key not in nodeList:
-                nodeList[key] = recipient.emailAddress
+            if key not in nodeDict:
+                nodeDict[key] = recipient.emailAddress
             else: pass
 
+            edgeArr.append({"sender": sender.id, "recip": recipient.id, "count": recipient.emailCount})
+
+
     print("DB nodes: (graph#" + str(graphID) + ")")
-    print(nodeList)
+    print(nodeDict)
     print("DB edges: (graph#" + str(graphID) + ")")
-    print(edgeList)
+    for e in edgeArr: print(e)
 
 # CreateNewGraph("HELLO")
 # CreateNewGraph("this is a graph")
