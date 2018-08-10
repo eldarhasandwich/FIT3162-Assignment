@@ -82,23 +82,39 @@ def PullListFromDB (graphID):
 
     adjList = AdjacencyList()
     for e in edges:
-        sender = filter(lambda x : x[0] == e[1], nodes)[0]
-        receiver = filter(lambda x : x[0] == e[2], nodes)[0]
+        senderID = e[1]
+        receiverID = e[2]
+        senderEmail = filter(lambda n : n[0] == senderID, nodes)[0][1]
+        receiverEmail = filter(lambda n : n[0] == receiverID, nodes)[0][1]
 
-        adjList.AddSenderRecipientPair(e[1], sender[1], e[2], receiver[1])
+        # print("senderID", senderID)
+        # print("receiverID", receiverID)
+        # print("senderEmail", senderEmail)
+        # print("receiverEmail", receiverEmail)
+
+        adjList.AddSenderRecipientPair(senderID, senderEmail, receiverID, receiverEmail)
+
+    return adjList
 
 def PushListToDB (graphID, _AdjacencyList):
     nodeList = {}
     edgeList = {}
 
-    for key, sender in self.senders.items():
+    for key, sender in _AdjacencyList.senders.items():
         if key not in nodeList:
-            nodeList[key] = sender
+            nodeList[key] = sender.emailAddress
         else: pass
         for key, recipient in sender.recipients.items():
+            # print("r_key", key)
+            # print("r_obj", recipient.emailAddress)
             if key not in nodeList:
-                nodeList[key] = recipient
+                nodeList[key] = recipient.emailAddress
             else: pass
+
+    print("DB nodes: (graph#" + str(graphID) + ")")
+    print(nodeList)
+    print("DB edges: (graph#" + str(graphID) + ")")
+    print(edgeList)
 
 # CreateNewGraph("HELLO")
 # CreateNewGraph("this is a graph")
@@ -108,7 +124,8 @@ def PushListToDB (graphID, _AdjacencyList):
 # RunQuery("SELECT * FROM nodes")
 # RunQuery("SELECT * FROM edges WHERE graph_ID = 1")
 # PullMatrixFromDB(1)
-PullListFromDB(1)
+adjList = PullListFromDB(1)
+PushListToDB(1, adjList)
 
 # UpdateEdgeData(3, 20)
 
