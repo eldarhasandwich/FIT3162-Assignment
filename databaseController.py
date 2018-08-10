@@ -109,16 +109,16 @@ def PushListToDB (graphID, _AdjacencyList):
 
     for key, sender in _AdjacencyList.senders.items():
         if key not in nodeDict:
-            nodeDict[key] = {"key": key, "address": sender.emailAddress}
+            nodeDict[key] = {"key": key, "address": sender.emailAddress, "graphID": graphID}
         else: pass
         for key, recipient in sender.recipients.items():
             # print("r_key", key)
             # print("r_obj", recipient.emailAddress)
             if key not in nodeDict:
-                nodeDict[key] = {"key": key, "address": sender.emailAddress}
+                nodeDict[key] = {"key": key, "address": sender.emailAddress, "graphID": graphID}
             else: pass
 
-            edgeArr.append({"sender": sender.id, "recip": recipient.id, "count": recipient.emailCount})
+            edgeArr.append({"sender": sender.id, "recip": recipient.id, "count": recipient.emailCount, "graphID": graphID})
 
     for key, node in nodeDict.items():
         nodeArr.append(node)
