@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 import pyqtgraph as pg
 
@@ -27,7 +28,6 @@ class Application(QTabWidget):
         layout.setColumnStretch(0, 25)
         layout.setColumnStretch(1, 75)
 
-
         listWidget = QListWidget()
         loadBtn = QPushButton("Load Graph")
 
@@ -37,6 +37,8 @@ class Application(QTabWidget):
         graphs = READ_AllGraphs()
         for g in graphs:
             listWidget.addItem(g[1])
+
+        
 
         self.setTabText(0,"View Graphs")
         self.tab1.setLayout(layout)
