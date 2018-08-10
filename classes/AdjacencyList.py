@@ -28,41 +28,27 @@ class AdjacencyList:
     #     newSender = Sender(senderID, email)
     #     self.senders.append(newSender)
 
-    def AddSenderRecipientPair(self, _senderID, _senderAddress, _recipientID, _recipientAddress):
+    def AddSenderRecipientPair(self, _senderID, _senderAddress, _recipientID, _recipientAddress, _value = 1, _incrementValue = True):
 
         for key, sender in self.senders.items():
             if sender.id == _senderID:
                 for key, recipient in sender.recipients.items():
                     if recipient.id == _recipientID:
-                        recipient.UpdateEmailCount(recipient.emailCount + 1)
+                        if _incrementValue:
+                            recipient.UpdateEmailCount(recipient.emailCount + _value)
+                        else:
+                            recipient.UpdateEmailCount(_value)
                         return
                     else: pass
-                sender.AddRecipient(_recipientID, _recipientAddress, 1)
+                sender.AddRecipient(_recipientID, _recipientAddress, _value)
                 return
             else: pass
 
         newSender = Sender(_senderID, _senderAddress)
-        newRecipient = Recipient(_recipientID, _recipientAddress, 1)
+        newRecipient = Recipient(_recipientID, _recipientAddress, _value)
         newSender.recipients[str(_recipientID)] = newRecipient
         self.senders[str(_senderID)] = newSender
 
-        # print(self.senders)
-
-    # def SaveListToDB(self, _graphID):
-    #     #turn list into lists of nodes and edges 
-
-    #     nodeList = {}
-    #     edgeList = {}
-
-    #     for key, sender in self.senders.items():
-    #         if key not in nodeList:
-    #             nodeList[key] = sender
-    #         else: pass
-    #         for key, recipient in sender.recipients.items():
-    #             if key not in nodeList:
-    #                 nodeList[key] = recipient
-    #             else: pass
-        
         
     
 
