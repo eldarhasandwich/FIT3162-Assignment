@@ -20,31 +20,36 @@ def RunQuery (qString):
 
 # create new graph
 # params: graph name
-# returns: TODO: return graph ID
+# returns: new graph ID
 def CreateNewGraph (newName):
     cur = conn.cursor()
-    cur.execute("INSERT INTO graphs (name) VALUES ('" + newName + "');")
-    # print(cur.fetchall())
+    cur.execute("INSERT INTO graphs (name) VALUES ('" + newName + "') RETURNING id;")
+    newID = cur.fetchall()[0]
     conn.commit()
     cur.close()
+    return newID
 
 # create new node
 # params: graphID, data (node emailAddr)
-# returns: TODO: return nodeID
+# returns: new nodeID
 def CreateNewNode (graphID, data):
     cur = conn.cursor()
-    cur.execute("INSERT INTO nodes (email, graph_ID) VALUES (%s, %s)", (data, graphID))
+    cur.execute("INSERT INTO nodes (email, graph_ID) VALUES (%s, %s) RETURNING id;", (data, graphID))
+    newID = cur.fetchall()[0]
     conn.commit()
     cur.close()
+    return newID
 
 # create new edge
 # params: graphID, senderID, recipID, data (emailcount)
 # returns: TODO: return edgeID
 def CreateNewEdge (graphID, senderID, recipientID, data):
     cur = conn.cursor()
-    cur.execute("INSERT INTO edges (graph_ID, sender_ID, recipient_ID, email_count) VALUES (%s, %s, %s, %s)", (graphID, senderID, recipientID, data))
+    cur.execute("INSERT INTO edges (graph_ID, sender_ID, recipient_ID, email_count) VALUES (%s, %s, %s, %s) RETURNING id", (graphID, senderID, recipientID, data))
+    newID = cur.fetchall()[0]
     conn.commit()
     cur.close()
+    return newID
 
 def UpdateEdgeData (edgeID, data):
     cur = conn.cursor()
@@ -132,3 +137,5 @@ def PushListToDB (graphID, _AdjacencyList):
 
 adjList = PullListFromDB(1)
 PushListToDB(1, adjList)
+
+print(CreateNewGraph("heyA"))
