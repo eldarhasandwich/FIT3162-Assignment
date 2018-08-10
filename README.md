@@ -30,4 +30,6 @@ psql -f snagraphs.sql
 ```
 
 
-test
+## Dev notes
+
+- you can only import other files from currect directory or directories that are child of the directory of your file 

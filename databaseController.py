@@ -38,15 +38,10 @@ def CreateNewEdge (graphID, senderID, recipientID, data):
     cur.close()
 
 def UpdateEdgeData (edgeID, data):
-    pass
-
-# CreateNewGraph("HELLO")
-# CreateNewGraph("this is a graph")
-# CreateNewNode(1, "eldar")
-# CreateNewEdge(1, 1, 2, 30)
-# RunQuery("SELECT * FROM graphs")
-# RunQuery("SELECT * FROM nodes")
-# RunQuery("SELECT * FROM edges WHERE graph_ID = 1")
+    cur = conn.cursor()
+    cur.execute("UPDATE edges SET email_count = %s WHERE id = %s", (data, edgeID))
+    conn.commit()
+    cur.close()
 
 def PullMatrixFromDB (graphID):
     graphID = str(graphID) #Typeerror without this line
@@ -105,5 +100,16 @@ def PushListToDB (graphID, _AdjacencyList):
                 nodeList[key] = recipient
             else: pass
 
+# CreateNewGraph("HELLO")
+# CreateNewGraph("this is a graph")
+# CreateNewNode(1, "eldar")
+# CreateNewEdge(1, 1, 2, 30)
+# RunQuery("SELECT * FROM graphs")
+# RunQuery("SELECT * FROM nodes")
+# RunQuery("SELECT * FROM edges WHERE graph_ID = 1")
 # PullMatrixFromDB(1)
 PullListFromDB(1)
+
+# UpdateEdgeData(3, 20)
+
+# PullListFromDB(1)
