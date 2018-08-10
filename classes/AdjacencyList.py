@@ -1,4 +1,6 @@
 
+# from databaseController import *
+
 class Recipient:
     def __init__(self, _id, _emailAddress, _emailCount):
         self.id = _id
@@ -22,9 +24,9 @@ class AdjacencyList:
     def __init__(self):
         self.senders = {}
 
-    def AddSender(self, senderID, email):
-        newSender = Sender(senderID, email)
-        self.senders.append(newSender)
+    # def AddSender(self, senderID, email):
+    #     newSender = Sender(senderID, email)
+    #     self.senders.append(newSender)
 
     def AddSenderRecipientPair(self, _senderID, _senderAddress, _recipientID, _recipientAddress):
 
@@ -46,5 +48,21 @@ class AdjacencyList:
 
         # print(self.senders)
 
+    # def SaveListToDB(self, _graphID):
+    #     #turn list into lists of nodes and edges 
+
+    #     nodeList = {}
+    #     edgeList = {}
+
+    #     for key, sender in self.senders.items():
+    #         if key not in nodeList:
+    #             nodeList[key] = sender
+    #         else: pass
+    #         for key, recipient in sender.recipients.items():
+    #             if key not in nodeList:
+    #                 nodeList[key] = recipient
+    #             else: pass
+        
+        
     
 

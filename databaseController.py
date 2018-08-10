@@ -92,5 +92,18 @@ def PullListFromDB (graphID):
 
         adjList.AddSenderRecipientPair(e[1], sender[1], e[2], receiver[1])
 
+def PushListToDB (graphID, _AdjacencyList):
+    nodeList = {}
+    edgeList = {}
+
+    for key, sender in self.senders.items():
+        if key not in nodeList:
+            nodeList[key] = sender
+        else: pass
+        for key, recipient in sender.recipients.items():
+            if key not in nodeList:
+                nodeList[key] = recipient
+            else: pass
+
 # PullMatrixFromDB(1)
 PullListFromDB(1)
