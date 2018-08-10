@@ -3,7 +3,7 @@ import psycopg2
 from classes.AdjacencyMatrix import *
 from classes.AdjacencyList import *
 
-conn = psycopg2.connect("dbname=testsnagraphs user=eldarhasandwich")
+conn = psycopg2.connect("dbname=testsnagraphs user=eldar")
 
 """
 Some notes about psycopg, its trash.

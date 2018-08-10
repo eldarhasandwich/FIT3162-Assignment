@@ -1,5 +1,5 @@
 
--- drop RATINGS database and connect
+-- drop RATINGS database and connectc
 DROP DATABASE IF EXISTS testsnagraphs;
 CREATE DATABASE testsnagraphs;
 \c testsnagraphs;
