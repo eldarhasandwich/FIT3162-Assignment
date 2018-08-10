@@ -24,12 +24,7 @@ class AdjacencyList:
     def __init__(self):
         self.senders = {}
 
-    # def AddSender(self, senderID, email):
-    #     newSender = Sender(senderID, email)
-    #     self.senders.append(newSender)
-
     def AddSenderRecipientPair(self, _senderID, _senderAddress, _recipientID, _recipientAddress, _value = 1, _incrementValue = True):
-
         for key, sender in self.senders.items():
             if sender.id == _senderID:
                 for key, recipient in sender.recipients.items():

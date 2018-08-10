@@ -1,10 +1,14 @@
 import sys
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 
-class tabdemo(QTabWidget):
+import pyqtgraph as pg
+
+from databaseController import *
+
+class Application(QTabWidget):
     def __init__(self, parent = None):
-        super(tabdemo, self).__init__(parent)
+        super(Application, self).__init__(parent)
         self.tab1 = QWidget()
         self.tab2 = QWidget()
         self.tab3 = QWidget()
@@ -18,31 +22,30 @@ class tabdemo(QTabWidget):
         self.setWindowTitle("FIT3162 Project - Social Network Analysis")
 
     def tab1UI(self):
-        layout = QFormLayout()
-        #   layout.addRow("Name",QLineEdit())
-        #   layout.addRow("Address",QLineEdit())
+        # grid is two columns, graph list and graph view
+        layout = QGridLayout()
+        layout.setColumnStretch(0, 25)
+        layout.setColumnStretch(1, 75)
+
 
         listWidget = QListWidget()
-        listWidget.resize(300,120)
-        layout.addRow("List", listWidget)
+        loadBtn = QPushButton("Load Graph")
 
-        listWidget.addItem("Ass")
-        listWidget.addItem("Ass")
-        listWidget.addItem("Ass")
-        listWidget.addItem("Ass")
-        listWidget.addItem("Ass")
-        listWidget.addItem("Ass")
+        layout.addWidget(listWidget, 0, 0)
+        layout.addWidget(loadBtn, 1, 0)
+
+        graphs = READ_AllGraphs()
+        for g in graphs:
+            listWidget.addItem(g[1])
 
         self.setTabText(0,"View Graphs")
         self.tab1.setLayout(layout)
 
+
+
+
     def tab2UI(self):
         layout = QFormLayout()
-        #   sex = QHBoxLayout()
-        #   sex.addWidget(QRadioButton("Male"))
-        #   sex.addWidget(QRadioButton("Female"))
-        #   layout.addRow(QLabel("Sex"),sex)
-        #   layout.addRow("Date of Birth",QLineEdit())
 
         fileSelectBtn = QPushButton("Click Here to Select a File")
         submitBtn = QPushButton("Submit")
@@ -56,9 +59,6 @@ class tabdemo(QTabWidget):
 
     def tab3UI(self):
         layout = QFormLayout()
-        #   layout.addWidget(QLabel("subjects")) 
-        #   layout.addWidget(QCheckBox("Physics"))
-        #   layout.addWidget(QCheckBox("Maths"))
 
         dropdown = QComboBox()
         dropdown.addItems(["something", "something else", "who cares"])
@@ -75,7 +75,7 @@ class tabdemo(QTabWidget):
 
 def main():
     app = QApplication(sys.argv)
-    ex = tabdemo()
+    ex = Application()
     ex.show()
     sys.exit(app.exec_())
 

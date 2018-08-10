@@ -98,10 +98,14 @@ def PullListFromDB (graphID):
     for e in edges:
         senderID = e[1]
         receiverID = e[2]
-        senderEmail = filter(lambda n : n[0] == senderID, nodes)[0][1]
-        receiverEmail = filter(lambda n : n[0] == receiverID, nodes)[0][1]
         emailCount = e[4]
         shouldIncrement = False
+
+        senderFilter = filter(lambda n : n[0] == senderID, nodes) # TODO: these filters are a bit ineffificient, change sometime
+        receiverFilter = filter(lambda n : n[0] == receiverID, nodes)
+
+        senderEmail = list(senderFilter)[0][1]
+        receiverEmail = list(receiverFilter)[0][1]
 
         adjList.AddSenderRecipientPair(senderID, senderEmail, receiverID, receiverEmail, emailCount, shouldIncrement)
 
@@ -131,10 +135,10 @@ def PushListToDB (graphID, _AdjacencyList):
     print("DB edges: (graph#" + str(graphID) + ")")
     for e in edgeArr: print(e)
 
-    
 
-adjList = PullListFromDB(1)
-PushListToDB(1, adjList)
+if __name__ == "__main__":
+    adjList = PullListFromDB(1)
+    PushListToDB(1, adjList)
 
-# print(CreateNewGraph("heyA"))
-print(READ_AllGraphs())
+    # print(CreateNewGraph("heyA"))
+    print(READ_AllGraphs())
