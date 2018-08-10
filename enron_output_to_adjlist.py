@@ -20,27 +20,16 @@ def EnronOutputToAdjList():
     text = f.read()
     f.close()
 
-    uniqueActorIDs = {}
-    nextID = 1
     lines = text.split("\n")
-    for l in lines:
-        s, r = LineToIndividuals(l)
-
-        if s not in uniqueActorIDs:
-            uniqueActorIDs[s] = str(nextID)
-            nextID += 1
-
-        for recip in r:
-            if recip not in uniqueActorIDs:
-                uniqueActorIDs[s] = str(nextID)
-                nextID += 1
 
     adjList = AL.AdjacencyList()
     for l in lines:
         s, r = LineToIndividuals(l)
 
         for recip in r:
-            adjList.AddSenderRecipientPair(uniqueActorIDs[s], s, uniqueActorIDs[recip], recip)
+            adjList.AddSenderRecipientPair(s, s, recip, recip)
+
+    return adjList
 
 
 

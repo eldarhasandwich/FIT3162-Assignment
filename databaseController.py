@@ -115,7 +115,7 @@ def PullListFromDB (graphID):
 
     return adjList
 
-def PushListToDB (graphID, _AdjacencyList):
+def PushAdjListToDB (graphID, _AdjacencyList):
     nodeDict = {}
     nodeArr = []
     edgeArr = []
@@ -142,4 +142,4 @@ def PushListToDB (graphID, _AdjacencyList):
 
 if __name__ == "__main__":
     adjList = enron.EnronOutputToAdjList()
-    PushListToDB(1, adjList)
+    PushAdjListToDB(1, adjList)
