@@ -169,8 +169,7 @@ class Group:
             for j in self.sorted_members:
                 adj_list[i].append((j, 0))
 
-        for key in self.sorted_members:
-            index = self.id_dict[key]
+        for index, key in enumerate(self.sorted_members):
             if key != self.original_sender:
                 c = 1
             else:
@@ -180,9 +179,8 @@ class Group:
 
         for key in self.sorted_members:
             if key != self.original_sender:
-                for j in range(len(self.sorted_members)):
-                    index = self.id_dict[self.sorted_members[j]]
-                    val = (self.sorted_members[j], 0)
+                for index, j in enumerate(self.sorted_members):
+                    val = (j, 0)
                     adj_list[key][index] = val
 
             return adj_list
@@ -204,6 +202,7 @@ class Group:
                 edge_val = edge[1]
                 output.write(vertex +" sent " + str(edge_val) + " to " + str(edge_string))
                 output.write("\n")
+        output.write("\n")
 
 
 class Groups:
