@@ -13,7 +13,7 @@ class FileProcessor:
         file_type = "sent"
         my_emails = []
         file_count = 0
-        file_limit = 5000
+        file_limit = 50000000000
         for dir_name, subdir, file_list in os.walk(self.directory):
             if file_count < file_limit:
                 if file_type in dir_name:
@@ -152,6 +152,7 @@ class Group:
         self.key = key
         self.id_dict = self.cons_id_dict()
         self.adj_list = self.cons_adj_list()
+        self.max_communications = 1
 
 
     def cons_id_dict(self):
@@ -190,24 +191,32 @@ class Group:
             index = self.id_dict[receiver]
             values = self.adj_list[sender]
             val = values[index]
-            new_val = (val[0], val[1] + 1)
+            val_string = val[0]
+            new_val_number = val[1] + 1
+            new_val = (val_string, new_val_number)
+            if new_val_number > self.max_communications:
+                self.max_communications = new_val_number
             self.adj_list[sender][index] = new_val
 
+
     def write_to_file(self, output):
-        output.write("Emails sent exclusively between the group of" + self.key)
-        output.write("\n")
-        for vertex in self.adj_list:
-            for edge in self.adj_list[vertex]:
-                edge_string = edge[0]
-                edge_val = edge[1]
-                output.write(vertex +" sent " + str(edge_val) + " to " + str(edge_string))
-                output.write("\n")
-        output.write("\n")
+        minimum_communications = 10
+        if self.max_communications >= minimum_communications:
+            output.write("Emails sent exclusively between the group of" + self.key)
+            output.write("\n")
+            for vertex in self.adj_list:
+                for edge in self.adj_list[vertex]:
+                    edge_string = edge[0]
+                    edge_val = edge[1]
+                    output.write(vertex +" sent " + str(edge_val) + " to " + str(edge_string))
+                    output.write("\n")
+            output.write("\n")
 
 
 class Groups:
     def __init__(self):
         self.elements = {}
+
 
 
     def add(self, members):
@@ -237,6 +246,5 @@ group_output = open("output.txt", 'w')
 file_processor = FileProcessor(my_directory)
 all_emails = file_processor.process_directory_files()
 all_groups = file_processor.groups.elements
-
 for group in all_groups:
     all_groups[group].write_to_file(group_output)
