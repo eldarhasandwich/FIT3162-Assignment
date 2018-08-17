@@ -5,7 +5,8 @@ from PyQt5.QtWidgets import *
 
 import pyqtgraph as pg
 
-from databaseController import *
+import appController as AppC
+import databaseController as DBC
 
 class Application(QTabWidget):
     def __init__(self, parent = None):
@@ -28,22 +29,24 @@ class Application(QTabWidget):
         layout.setColumnStretch(0, 25)
         layout.setColumnStretch(1, 75)
 
+        listLabel = QLabel("Datasets in Database")
         listWidget = QListWidget()
         loadBtn = QPushButton("Load Graph")
+        layout.addWidget(listLabel, 0, 0)
+        layout.addWidget(listWidget, 1, 0)
+        layout.addWidget(loadBtn, 2, 0)
 
-        layout.addWidget(listWidget, 0, 0)
-        layout.addWidget(loadBtn, 1, 0)
+        graphLabel = QLabel("Graph")
+        graph = pg.PlotWidget()
+        layout.addWidget(graphLabel, 0, 1)
+        layout.addWidget(graph, 1, 1)
 
         graphs = READ_AllGraphs()
         for g in graphs:
             listWidget.addItem(g[1])
 
-        
-
         self.setTabText(0,"View Graphs")
         self.tab1.setLayout(layout)
-
-
 
 
     def tab2UI(self):

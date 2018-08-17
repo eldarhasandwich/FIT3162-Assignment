@@ -93,6 +93,16 @@ def UPDATE_EdgeData (edgeID, data):
     conn.commit()
     cur.close()   
 
+def DELETE_AllNodesInGraph (graphID):
+    cur = conn.cursor()
+    cur.execute("DELETE nodes WHERE graph_ID = %s", (graphID))
+    cur.close()
+
+def DELETE_AllEdgesInGraph (graphID):
+    cur = conn.cursor()
+    cur.execute("DELETE edges WHERE graph_ID = %s", (graphID))
+    cur.close()
+
 def PullListFromDB (graphID):
     graphID = str(graphID) #Typeerror without this line
     nodes = READ_NodesInGraph(graphID)
@@ -135,10 +145,16 @@ def PushAdjListToDB (graphID, _AdjacencyList):
         nodeArr.append(node)
 
     print("DB nodes: (graph#" + str(graphID) + ")")
-    for n in nodeArr: print(n)
+    for n in nodeArr: 
+        print(n)
+        CREATE_NewNode(graphID, n["address"])
     print("DB edges: (graph#" + str(graphID) + ")")
-    for e in edgeArr: print(e)
+    # for e in edgeArr: print(e)
 
+    # DELETE_AllNodesInGraph(graphID)
+    # DELETE_AllEdgesInGraph(graphID)
+
+    
 
 if __name__ == "__main__":
     adjList = enron.EnronOutputToAdjList()
