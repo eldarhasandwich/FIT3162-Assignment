@@ -31,6 +31,21 @@ def EnronOutputToAdjList():
 
     return adjList
 
+def TxtToAdjList(file):
+    text = file.read()
+    file.close()
+
+    lines = text.split("\n")
+
+    adjList = AL.AdjacencyList()
+    for l in lines:
+        s, r = LineToIndividuals(l)
+
+        for recip in r:
+            adjList.AddSenderRecipientPair(s, s, recip, recip)
+
+    return adjList
+
 
 
 if __name__ == "__main__":

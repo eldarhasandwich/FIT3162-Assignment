@@ -7,10 +7,16 @@ import pyqtgraph as pg
 
 import appController as AppC
 import databaseController as DBC
+import enron_output_to_adjlist as enron
+
 
 class Application(QTabWidget):
     def __init__(self, parent = None):
         super(Application, self).__init__(parent)
+
+        self.graphList = QListWidget()
+        self.fileSelectionDescription = QLabel("default text")
+
         self.tab1 = QWidget()
         self.tab2 = QWidget()
         self.tab3 = QWidget()
@@ -23,17 +29,27 @@ class Application(QTabWidget):
         self.tab3UI()
         self.setWindowTitle("FIT3162 Project - Social Network Analysis")
 
-    def tab1UI(self):
+        self.fileSelectionSelectedFileName = ""
+        self.fileSelectionSelectedFile = None
+    ###-----
+
+    def refreshGraphList(self):
+        graphs = DBC.READ_AllGraphs()
+        self.graphList.clear()
+        for g in graphs:
+            self.graphList.addItem(g[1])
+
+    def tab1UI(self): # graph display
         # grid is two columns, graph list and graph view
         layout = QGridLayout()
         layout.setColumnStretch(0, 25)
         layout.setColumnStretch(1, 75)
 
         listLabel = QLabel("Datasets in Database")
-        listWidget = QListWidget()
         loadBtn = QPushButton("Load Graph")
+
         layout.addWidget(listLabel, 0, 0)
-        layout.addWidget(listWidget, 1, 0)
+        layout.addWidget(self.graphList, 1, 0)
         layout.addWidget(loadBtn, 2, 0)
 
         graphLabel = QLabel("Graph")
@@ -41,28 +57,51 @@ class Application(QTabWidget):
         layout.addWidget(graphLabel, 0, 1)
         layout.addWidget(graph, 1, 1)
 
-        graphs = READ_AllGraphs()
-        for g in graphs:
-            listWidget.addItem(g[1])
+        self.refreshGraphList()
 
         self.setTabText(0,"View Graphs")
         self.tab1.setLayout(layout)
+    ###-----
+
+    def openFileNameDialog(self):    
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","All Files (*);;Python Files (*.py)", options=options)
+        if fileName:
+            print(fileName)
+            self.fileSelectionSelectedFile = open(fileName, "r")
+            self.fileSelectionSelectedFileName = fileName.split('/')[-1]
+            self.fileSelectionDescription.setText(self.fileSelectionSelectedFileName)
+
+    def parseTxtFileIntoDB(self):
+        adjList = enron.TxtToAdjList(self.fileSelectionSelectedFile)
+        graphId = DBC.CREATE_NewGraph(self.fileSelectionSelectedFileName)
+        DBC.PushAdjListToDB(graphId, adjList)
+        self.fileSelectionDescription.setText("Select a file first.")
+        self.refreshGraphList()
 
 
-    def tab2UI(self):
+    def tab2UI(self): # file selection
         layout = QFormLayout()
 
         fileSelectBtn = QPushButton("Click Here to Select a File")
+        fileSelectBtn.clicked.connect(self.openFileNameDialog)
+
         submitBtn = QPushButton("Submit")
+        submitBtn.clicked.connect(self.parseTxtFileIntoDB)
+
+        self.fileSelectionDescription.setText("Select a file first.")
 
         layout.addRow(QLabel("Import New Graph"))
         layout.addRow(fileSelectBtn)
-        layout.addRow(submitBtn)        
+        layout.addRow(self.fileSelectionDescription)
+        layout.addRow(submitBtn)
 
         self.setTabText(1,"Import New Graph")
         self.tab2.setLayout(layout)
+    ###-----
 
-    def tab3UI(self):
+    def tab3UI(self): # analysis selection 
         layout = QFormLayout()
 
         dropdown = QComboBox()
@@ -77,6 +116,7 @@ class Application(QTabWidget):
 
         self.setTabText(2,"Run Analysis")
         self.tab3.setLayout(layout)
+    ###-----
 
 def main():
     app = QApplication(sys.argv)

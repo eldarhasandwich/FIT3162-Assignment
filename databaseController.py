@@ -24,14 +24,14 @@ def RunQuery (qString):
     cur.execute(qString)
     print(cur.fetchall())
     cur.close()
-
+    
 # create new graph
 # params: graph name
 # returns: new graph ID
 def CREATE_NewGraph (newName):
     cur = conn.cursor()
     cur.execute("INSERT INTO graphs (name) VALUES ('" + newName + "') RETURNING id;")
-    newID = cur.fetchall()[0]
+    newID = cur.fetchone()[0]
     conn.commit()
     cur.close()
     return newID
@@ -100,11 +100,13 @@ def UPDATE_EdgeData (edgeID, data):
     conn.commit()
     cur.close()   
 
+# delete all nodes with the given graph id
 def DELETE_AllNodesInGraph (graphID):
     cur = conn.cursor()
     cur.execute("DELETE FROM nodes WHERE graph_ID = %s", (str(graphID)))
     cur.close()
 
+# delete all edges with the given graph id
 def DELETE_AllEdgesInGraph (graphID):
     cur = conn.cursor()
     cur.execute("DELETE FROM edges WHERE graph_ID = %s", (str(graphID)))
@@ -151,8 +153,8 @@ def PushAdjListToDB (graphID, _AdjacencyList):
     for key, node in nodeDict.items():
         nodeArr.append(node)
 
-    DELETE_AllEdgesInGraph(graphID)
-    DELETE_AllNodesInGraph(graphID)
+    # DELETE_AllEdgesInGraph(graphID)
+    # DELETE_AllNodesInGraph(graphID)
 
     print("DB nodes: (graph#" + str(graphID) + ")")
     for n in nodeArr: 
@@ -163,9 +165,6 @@ def PushAdjListToDB (graphID, _AdjacencyList):
         senderObj = READ_NodeByAddress(graphID, e["sender"])
         recipientObj = READ_NodeByAddress(graphID, e["recip"])
         print(e)
-        print("aaa")
-        print(senderObj)
-        print(recipientObj)
         CREATE_NewEdge(graphID, senderObj[0], recipientObj[0], e["count"])
 
 if __name__ == "__main__":

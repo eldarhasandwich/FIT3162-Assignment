@@ -44,7 +44,3 @@ class AdjacencyList:
         newRecipient = Recipient(_recipientID, _recipientAddress, _value)
         newSender.recipients[str(_recipientID)] = newRecipient
         self.senders[str(_senderID)] = newSender
-
-        
-    
-
