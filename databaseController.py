@@ -77,6 +77,13 @@ def READ_NodesInGraph (graphID):
     cur.close()
     return value
 
+def READ_NodeByAddress (graphID, email):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM nodes WHERE graph_ID = %s and email = %s", (graphID, email))
+    value = cur.fetchone()
+    cur.close()
+    return value
+
 # returns array of all edges in a given graph
 def READ_EdgesInGraph (graphID):
     cur = conn.cursor()
@@ -95,12 +102,12 @@ def UPDATE_EdgeData (edgeID, data):
 
 def DELETE_AllNodesInGraph (graphID):
     cur = conn.cursor()
-    cur.execute("DELETE nodes WHERE graph_ID = %s", (graphID))
+    cur.execute("DELETE FROM nodes WHERE graph_ID = %s", (str(graphID)))
     cur.close()
 
 def DELETE_AllEdgesInGraph (graphID):
     cur = conn.cursor()
-    cur.execute("DELETE edges WHERE graph_ID = %s", (graphID))
+    cur.execute("DELETE FROM edges WHERE graph_ID = %s", (str(graphID)))
     cur.close()
 
 def PullListFromDB (graphID):
@@ -134,9 +141,9 @@ def PushAdjListToDB (graphID, _AdjacencyList):
         if key not in nodeDict:
             nodeDict[key] = {"key": key, "address": sender.emailAddress, "graphID": graphID}
         else: pass
-        for key, recipient in sender.recipients.items():
-            if key not in nodeDict:
-                nodeDict[key] = {"key": key, "address": sender.emailAddress, "graphID": graphID}
+        for rkey, recipient in sender.recipients.items():
+            if rkey not in nodeDict:
+                nodeDict[rkey] = {"key": rkey, "address": recipient.emailAddress, "graphID": graphID}
             else: pass
 
             edgeArr.append({"sender": sender.id, "recip": recipient.id, "count": recipient.emailCount, "graphID": graphID})
@@ -144,17 +151,22 @@ def PushAdjListToDB (graphID, _AdjacencyList):
     for key, node in nodeDict.items():
         nodeArr.append(node)
 
+    DELETE_AllEdgesInGraph(graphID)
+    DELETE_AllNodesInGraph(graphID)
+
     print("DB nodes: (graph#" + str(graphID) + ")")
     for n in nodeArr: 
         print(n)
-        CREATE_NewNode(graphID, n["address"])
+        CREATE_NewNode(graphID, n["address"]) # newnode returns nodeid, should use this instead of querying db for node ids
     print("DB edges: (graph#" + str(graphID) + ")")
-    # for e in edgeArr: print(e)
-
-    # DELETE_AllNodesInGraph(graphID)
-    # DELETE_AllEdgesInGraph(graphID)
-
-    
+    for e in edgeArr: 
+        senderObj = READ_NodeByAddress(graphID, e["sender"])
+        recipientObj = READ_NodeByAddress(graphID, e["recip"])
+        print(e)
+        print("aaa")
+        print(senderObj)
+        print(recipientObj)
+        CREATE_NewEdge(graphID, senderObj[0], recipientObj[0], e["count"])
 
 if __name__ == "__main__":
     adjList = enron.EnronOutputToAdjList()
