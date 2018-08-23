@@ -1,7 +1,5 @@
 
 import psycopg2
-# from classes.AdjacencyMatrix import *
-# from classes.AdjacencyList import *
 import classes.AdjacencyList as AL
 import enron_output_to_adjlist as enron
 

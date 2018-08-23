@@ -20,5 +20,9 @@ CREATE TABLE edges (
     email_count INT
 );
 
--- CREATE INDEX idx_nodes_graph ON nodes USING btree (graph_ID);
-
+CREATE TABLE analysis_results (
+    edge_ID INT REFERENCES edges(ID) NOT NULL,
+    analysis_key VARCHAR(6) NOT NULL,
+    value FLOAT,
+    PRIMARY KEY(edge_ID, analysis_key) 
+);
