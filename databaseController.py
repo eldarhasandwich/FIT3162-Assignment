@@ -134,7 +134,7 @@ def PullListFromDB (graphID):
 
     return adjList
 
-def PushAdjListToDB (graphID, _AdjacencyList):
+def PushAdjListToDB (graphID, _AdjacencyList, _deleteExistingGraph = False):
     nodeDict = {}
     nodeArr = []
     edgeArr = []
@@ -153,18 +153,19 @@ def PushAdjListToDB (graphID, _AdjacencyList):
     for key, node in nodeDict.items():
         nodeArr.append(node)
 
-    # DELETE_AllEdgesInGraph(graphID)
-    # DELETE_AllNodesInGraph(graphID)
+    if _deleteExistingGraph:
+        DELETE_AllEdgesInGraph(graphID)
+        DELETE_AllNodesInGraph(graphID)
 
     print("DB nodes: (graph#" + str(graphID) + ")")
     for n in nodeArr: 
-        print(n)
+        # print(n)
         CREATE_NewNode(graphID, n["address"]) # newnode returns nodeid, should use this instead of querying db for node ids
     print("DB edges: (graph#" + str(graphID) + ")")
     for e in edgeArr: 
         senderObj = READ_NodeByAddress(graphID, e["sender"])
         recipientObj = READ_NodeByAddress(graphID, e["recip"])
-        print(e)
+        # print(e)
         CREATE_NewEdge(graphID, senderObj[0], recipientObj[0], e["count"])
 
 if __name__ == "__main__":

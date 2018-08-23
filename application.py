@@ -9,35 +9,54 @@ import appController as AppC
 import databaseController as DBC
 import enron_output_to_adjlist as enron
 
-
 class Application(QTabWidget):
     def __init__(self, parent = None):
         super(Application, self).__init__(parent)
 
+        self.selectedGraphId = None
+        self.loadedGraphs = {}
+
         self.graphList = QListWidget()
-        self.fileSelectionDescription = QLabel("default text")
-
+        self.graphList.itemClicked.connect(self.graphItemClicked)
         self.tab1 = QWidget()
-        self.tab2 = QWidget()
-        self.tab3 = QWidget()
-
         self.addTab(self.tab1,"Tab 1")
-        self.addTab(self.tab2,"Tab 2")
-        self.addTab(self.tab3,"Tab 3")
         self.tab1UI()
-        self.tab2UI()
-        self.tab3UI()
-        self.setWindowTitle("FIT3162 Project - Social Network Analysis")
+        ##--
 
         self.fileSelectionSelectedFileName = ""
         self.fileSelectionSelectedFile = None
+
+        self.fileSelectionDescription = QLabel("default text")
+        self.tab2 = QWidget()
+        self.addTab(self.tab2,"Tab 2")
+        self.tab2UI()
+        ##--
+
+        self.tab3 = QWidget()
+        self.addTab(self.tab3,"Tab 3")
+        self.tab3UI()
+        ##--
+
+        self.setWindowTitle("FIT3162 Project - Social Network Analysis")
     ###-----
 
     def refreshGraphList(self):
         graphs = DBC.READ_AllGraphs()
         self.graphList.clear()
         for g in graphs:
-            self.graphList.addItem(g[1])
+            self.graphList.addItem(str(g[0]) + ") " + g[1])
+
+    def graphItemClicked(self, item):
+        print('clicked on graph item')
+        gId = item.text().split(') ')[0]
+        print("graphId =", gId)
+        self.selectedGraphId = gId
+
+    def loadSelectedGraph(self):
+        if self.selectedGraphId == None: return
+        adjList = DBC.PullListFromDB(self.selectedGraphId)
+        self.loadedGraphs[self.selectedGraphId] = adjList
+        print("list loading complete")
 
     def tab1UI(self): # graph display
         # grid is two columns, graph list and graph view
@@ -47,6 +66,7 @@ class Application(QTabWidget):
 
         listLabel = QLabel("Datasets in Database")
         loadBtn = QPushButton("Load Graph")
+        loadBtn.clicked.connect(self.loadSelectedGraph)
 
         layout.addWidget(listLabel, 0, 0)
         layout.addWidget(self.graphList, 1, 0)
@@ -79,7 +99,6 @@ class Application(QTabWidget):
         DBC.PushAdjListToDB(graphId, adjList)
         self.fileSelectionDescription.setText("Select a file first.")
         self.refreshGraphList()
-
 
     def tab2UI(self): # file selection
         layout = QFormLayout()
