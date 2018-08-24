@@ -23,6 +23,7 @@ class Application(QTabWidget):
         self.tab1UI()
         ##--
 
+        self.fileCanBeParsed = False
         self.fileSelectionSelectedFileName = ""
         self.fileSelectionSelectedFile = None
 
@@ -91,14 +92,20 @@ class Application(QTabWidget):
             print(fileName)
             self.fileSelectionSelectedFile = open(fileName, "r")
             self.fileSelectionSelectedFileName = fileName.split('/')[-1]
-            self.fileSelectionDescription.setText(self.fileSelectionSelectedFileName)
+            msg, isValid = enron.EnronOutputIsValid(self.fileSelectionSelectedFile)
+            self.fileSelectionDescription.setText(self.fileSelectionSelectedFileName + ": " + msg)
+            self.fileCanBeParsed = isValid
+
 
     def parseTxtFileIntoDB(self):
+        if not self.fileCanBeParsed:
+            return
         adjList = enron.TxtToAdjList(self.fileSelectionSelectedFile)
         graphId = DBC.CREATE_NewGraph(self.fileSelectionSelectedFileName)
         DBC.PushAdjListToDB(graphId, adjList)
         self.fileSelectionDescription.setText("Select a file first.")
         self.refreshGraphList()
+        self.fileCanBeParsed = False
 
     def tab2UI(self): # file selection
         layout = QFormLayout()
