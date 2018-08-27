@@ -18,6 +18,19 @@ class Sender:
         newRecipient = Recipient(recipientID, recipientAddress, emailCount)
         self.recipients[str(recipientID)] = newRecipient
 
+    def recipients_as_list(self):
+        my_list = []
+        for recipient in self.recipients:
+            val = (recipient, self.recipients[recipient].emailCount)
+            my_list.append(val)
+        return my_list
+
+    def number_of_recipients(self):
+        return len(self.recipients_as_list())
+
+    def toString(self):
+        return str(self.id)
+
 class AdjacencyList:
     def __init__(self):
         self.senders = {}
@@ -44,3 +57,7 @@ class AdjacencyList:
         newRecipient = Recipient(_recipientID, _recipientAddress, _value)
         newSender.recipients[str(_recipientID)] = newRecipient
         self.senders[str(_senderID)] = newSender
+
+    def get_sender_as_object(self, sender):
+        assert sender in self.senders
+        return self.senders[sender]
