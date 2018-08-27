@@ -4,28 +4,22 @@ from collections import deque
 class GraphStatistics:
     def __init__(self):
         self.adj_list = {}
-        self.nodes = {}
 
 
     def add_data(self, sender):
         assert isinstance(sender, AL.Sender)
         sender_key = sender.toString()
         recipients = sender.recipients_as_list()
-        self.adj_list[sender_key] = recipients
-        if sender_key not in self.nodes:
-            self.nodes[sender_key] = True
+        if sender not in self.adj_list:
+            self.adj_list[sender_key] = recipients
 
-        for recipient in recipients:
-            recipient_str = recipient[0]
-            if recipient_str not in self.nodes:
-                self.nodes[recipient_str] = True
 
     def print_nodes(self):
-        for node in self.nodes:
+        for node in self.adj_list:
             print(node)
 
     def number_of_nodes(self):
-        return len(self.nodes)
+        return len(self.adj_list)
 
     def number_of_edges(self):
         c = 0
@@ -42,11 +36,11 @@ class GraphStatistics:
         max_number_of_edges = self.max_edges()
         return float(edges / max_number_of_edges)
 
-    #No need to use Dijkstra's here because graph is unweighted, instead use BFS
+
     def shortest_path_between_two_nodes(self, start, end):
         path_found = False
-        visited = {i: False for i in self.nodes}
-        previous = {j: None for j in self.nodes}
+        visited = {i: False for i in self.adj_list}
+        previous = {j: None for j in self.adj_list}
         prev_node = None
         my_queue = deque()
         my_queue.append(start)
@@ -61,13 +55,14 @@ class GraphStatistics:
                     edges = self.adj_list[vertex]
                     for node in edges:
                         node = node[0]
-                        my_queue.append(node)
-                        if node == end:
-                            path_found = True
-                            if not prev_node:
-                                prev_node = vertex
-                            previous[node] = prev_node
-                            break
+                        if node in self.adj_list:
+                            my_queue.append(node)
+                            if node == end:
+                                path_found = True
+                                if not prev_node:
+                                    prev_node = vertex
+                                previous[node] = prev_node
+                                break
 
                 prev_node = vertex
                 if path_found:
@@ -75,7 +70,7 @@ class GraphStatistics:
 
 
         if not path_found:
-            return "No path"
+            return None
         else:
             path = []
             next_node = end
@@ -87,23 +82,37 @@ class GraphStatistics:
 
     def all_shortest_paths(self):
         paths = []
-        node_list = list(self.nodes)
-        for i in range(len(node_list)):
-            for j in range(len(node_list)):
+        for i in self.adj_list:
+            for j in self.adj_list:
                 if i != j:
-                    node_i = node_list[i]
-                    node_j = node_list[j]
-                    shortest_path = self.shortest_path_between_two_nodes(node_i, node_j)
-                    paths.append(shortest_path)
+                    shortest_path = self.shortest_path_between_two_nodes(i, j)
+                    if shortest_path:
+                        paths.append(shortest_path)
         return paths
 
     def betweenness_centrality(self):
-        my_nodes = {i: 0 for i in self.nodes}
+        my_nodes = {i: 0 for i in self.adj_list}
         all_paths = self.all_shortest_paths()
         for path in all_paths:
             for node in path:
                 my_nodes[node] += 1
-        return my_nodes
+        node_list = []
+        for node in my_nodes:
+            val = (node, my_nodes[node])
+            node_list.append(val)
+        node_list.sort(key = lambda x: x[1])
+        node_list.reverse()
+        return node_list
+
+    def closeness_centrality(self, node):
+        closeness = 0
+        for v in self.adj_list:
+            if v != node:
+                path = self.shortest_path_between_two_nodes(node, v)
+                if path:
+                    closeness += len(path)
+        return 1 / closeness
+
 
 
 
