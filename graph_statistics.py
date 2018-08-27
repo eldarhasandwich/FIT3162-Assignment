@@ -77,9 +77,35 @@ class GraphStatistics:
         if not path_found:
             return "No path"
         else:
-            c = 0
+            path = []
             next_node = end
             while previous[next_node]:
-                c += 1
+                path.append(next_node)
                 next_node = previous[next_node]
-        return c
+            path.append(next_node)
+            return path
+
+    def all_shortest_paths(self):
+        paths = []
+        node_list = list(self.nodes)
+        for i in range(len(node_list)):
+            for j in range(len(node_list)):
+                if i != j:
+                    node_i = node_list[i]
+                    node_j = node_list[j]
+                    shortest_path = self.shortest_path_between_two_nodes(node_i, node_j)
+                    paths.append(shortest_path)
+        return paths
+
+    def betweenness_centrality(self):
+        my_nodes = {i: 0 for i in self.nodes}
+        all_paths = self.all_shortest_paths()
+        for path in all_paths:
+            for node in path:
+                my_nodes[node] += 1
+        return my_nodes
+
+
+
+
+
