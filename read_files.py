@@ -1,5 +1,4 @@
-import os, re, string
-
+import os, re, string, time
 
 class FileProcessor:
     def __init__(self, directory):
@@ -7,25 +6,24 @@ class FileProcessor:
         self.email_reader = EmailReader()
         self.email_container = EmailContainer()
         self.groups = Groups()
-
+        self.file_count = 0
+        self.file_limit = 500000000
 
     def process_directory_files(self):
         file_type = "sent"
         my_emails = []
-        file_count = 0
-        file_limit = 50000000000
         for dir_name, subdir, file_list in os.walk(self.directory):
-            if file_count < file_limit:
-                if file_type in dir_name:
-                    for file_name in file_list:
-                        file_count += 1
-                        file_location = self.concatenate_file_location(dir_name, file_name)
-                        sender, receivers, id, group_members = self.email_reader.get_email_attributes(file_location)
-                        if sender and receivers and id:
-                            if self.email_container.email_is_unique(sender, receivers, id):
-                                self.email_container.add_email(sender, receivers, id)
-                        if group_members:
-                            self.groups.add(group_members)
+            if self.file_count < self.file_limit:
+                for file_name in file_list:
+                    self.file_count += 1
+                    file_location = self.concatenate_file_location(dir_name, file_name)
+                    sender, receivers, id, group_members = self.email_reader.get_email_attributes(file_location)
+                    if sender and receivers and id:
+                        if self.email_container.email_is_unique(sender, receivers, id):
+                            self.email_container.add_email(sender, receivers, id)
+
+                    if group_members:
+                        self.groups.add(group_members)
 
         return my_emails
 
@@ -34,12 +32,10 @@ class FileProcessor:
 
 class EmailReader:
     def __init__(self):
-        self.temp = "Hi"
-
+        self.email_read = False
 
     def get_email_attributes(self, email):
-        group_members = None
-        sender, receivers, id = None, None, None
+        sender, receivers, id, group_members = None, None, None, None
         with open(email, 'r') as f:
             contents = f.readlines()
             for line in contents:
@@ -52,14 +48,16 @@ class EmailReader:
                     receivers = self.get_receivers(line)
                 if sender and receivers and id:
                     if len(receivers) > 1:
-                        group_members = [sender]
-                        for i in receivers:
-                            group_members.append(i)
-
+                        group_members = self.create_group(sender, receivers)
                     break
-
-
         return sender, receivers, id, group_members
+
+    def create_group(self, sender, receivers):
+        a_group = [sender]
+        for i in receivers:
+            a_group.append(i)
+        return a_group
+
 
     def get_receivers(self, a_string):
         receiver_substring = "To:"
@@ -72,7 +70,6 @@ class EmailReader:
                 receiver_name = self.get_email_address(cleaned_receiver)
                 if self.address_is_valid(receiver_name):
                     receivers.append(receiver_name)
-
             if len(receivers) > 0:
                 return receivers
 
@@ -112,7 +109,6 @@ class EmailReader:
             return True
         return False
 
-
 class Email:
     def __init__(self, sender, receivers, message_id):
         self.sender = sender
@@ -141,27 +137,23 @@ class EmailContainer:
     def get_emails(self):
         return self.unique_emails
 
-    def add_to_adjacency_list(self, adj_list):
-        return
-
 class Group:
     def __init__(self, sorted_members, sender, receivers, key):
         self.sorted_members = sorted_members
         self.original_sender = sender
         self.original_receivers = receivers
         self.key = key
+        self.max_communications = 1
         self.id_dict = self.cons_id_dict()
         self.adj_list = self.cons_adj_list()
-        self.max_communications = 1
+        self.add_initial_values()
 
 
     def cons_id_dict(self):
-        c = 0
-        id_dict = {}
-        for i in self.sorted_members:
-            id_dict[i] = c
-            c += 1
-        return id_dict
+        a_dict = {}
+        for i, member in enumerate(self.sorted_members):
+            a_dict[member] = i
+        return a_dict
 
     def cons_adj_list(self):
         adj_list = {}
@@ -169,22 +161,13 @@ class Group:
             adj_list[i] = []
             for j in self.sorted_members:
                 adj_list[i].append((j, 0))
+        return adj_list
 
+    def add_initial_values(self):
         for index, key in enumerate(self.sorted_members):
             if key != self.original_sender:
-                c = 1
-            else:
-                c = 0
-            val = (key, c)
-            adj_list[self.original_sender][index] = val
-
-        for key in self.sorted_members:
-            if key != self.original_sender:
-                for index, j in enumerate(self.sorted_members):
-                    val = (j, 0)
-                    adj_list[key][index] = val
-
-            return adj_list
+                val = (key, 1)
+                self.adj_list[self.original_sender][index] = val
 
     def add_email(self, sender, receivers):
         for receiver in receivers:
@@ -198,26 +181,28 @@ class Group:
                 self.max_communications = new_val_number
             self.adj_list[sender][index] = new_val
 
-
     def write_to_file(self, output):
         minimum_communications = 10
         if self.max_communications >= minimum_communications:
             output.write("Emails sent exclusively between the group of" + self.key)
             output.write("\n")
             for vertex in self.adj_list:
+                vertex = vertex.strip()
                 for edge in self.adj_list[vertex]:
-                    edge_string = edge[0]
-                    edge_val = edge[1]
-                    output.write(vertex +" sent " + str(edge_val) + " to " + str(edge_string))
-                    output.write("\n")
+                    if edge:
+                        edge_string = edge[0]
+                        edge_string = edge_string.strip()
+                        if vertex != edge_string:
+                            edge_val = edge[1]
+                            output.write(vertex +" sent " + str(edge_val) + " to " + str(edge_string))
+                            output.write("\n")
             output.write("\n")
 
 
 class Groups:
     def __init__(self):
         self.elements = {}
-
-
+        self.c = 0
 
     def add(self, members):
         assert isinstance(members, list)
@@ -227,6 +212,8 @@ class Groups:
         members.sort()
         key = self.create_dict_key(members)
         if key not in self.elements:
+            print(key)
+            self.c += 1
             self.elements[key] = Group(members, sender, receivers, key)
         else:
             self.elements[key].add_email(sender, receivers)
@@ -237,14 +224,25 @@ class Groups:
             my_str += str(e) + ", "
         return my_str[:-2]
 
+    def write_groups_to_file(self, output):
+        all_groups = self.elements
+        for key in all_groups:
+            all_groups[key].write_to_file(output)
+        output.write("{0} total groups.".format(self.c))
 
 
+def main():
+    start = time.time()
+    my_directory = "C:\\Users\\Valued Customer\\Desktop\\maildir"
+    group_output = open("output.txt", 'w')
+    file_processor = FileProcessor(my_directory)
+    all_emails = file_processor.process_directory_files()
+    file_processor.groups.write_groups_to_file(group_output)
+    total_files = file_processor.file_count
+    end = time.time()
+    print("{0} files read in {1}".format(total_files, end - start))
+
+if __name__ == "__main__":
+    main()
 
 
-my_directory = "C:\\Users\\Valued Customer\\Desktop\\maildir"
-group_output = open("output.txt", 'w')
-file_processor = FileProcessor(my_directory)
-all_emails = file_processor.process_directory_files()
-all_groups = file_processor.groups.elements
-for group in all_groups:
-    all_groups[group].write_to_file(group_output)
