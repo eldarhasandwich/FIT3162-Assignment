@@ -90,19 +90,32 @@ class GraphStatistics:
                         paths.append(shortest_path)
         return paths
 
-    def betweenness_centrality(self):
+    def degree_centrality(self, node):
+        c = 0
+        neighbours = self.adj_list[node]
+        for v in neighbours:
+            v = v[0]
+            if v in self.adj_list:
+                c += 1
+        return c
+
+
+    def betweenness_centrality(self, node = None):
         my_nodes = {i: 0 for i in self.adj_list}
         all_paths = self.all_shortest_paths()
         for path in all_paths:
-            for node in path:
-                my_nodes[node] += 1
-        node_list = []
-        for node in my_nodes:
-            val = (node, my_nodes[node])
-            node_list.append(val)
-        node_list.sort(key = lambda x: x[1])
-        node_list.reverse()
-        return node_list
+            for v in path:
+                my_nodes[v] += 1
+        if node:
+            return my_nodes[node]
+        else:
+            node_list = []
+            for node in my_nodes:
+                val = (node, my_nodes[node])
+                node_list.append(val)
+            node_list.sort(key = lambda x: x[1])
+            node_list.reverse()
+            return node_list
 
     def closeness_centrality(self, node):
         closeness = 0
@@ -112,6 +125,37 @@ class GraphStatistics:
                 if path:
                     closeness += len(path)
         return 1 / closeness
+
+    def harmonic_centrality(self, node):
+        h_centrality = 0
+        for v in self.adj_list:
+            if v != node:
+                path = self.shortest_path_between_two_nodes(node, v)
+                if path:
+                    h_centrality += (1 / len(path))
+        return h_centrality
+
+    def eigenvector_centrality(self):
+        return self.graph_as_adj_matrix()
+
+    def graph_as_adj_matrix(self):
+        matrix_order = {}
+        c = 0
+        for sender in self.adj_list:
+            matrix_order[sender] = c
+            c += 1
+        N = len(self.adj_list)
+        adj_matrix = [[0 for _ in range(N)] for _ in range(N)]
+        for sender in self.adj_list:
+            row = matrix_order[sender]
+            recipients = self.adj_list[sender]
+            for recipient in recipients:
+                recipient = recipient[0]
+                if recipient in self.adj_list:
+                    col = matrix_order[recipient]
+                    adj_matrix[row][col] = 1
+        return adj_matrix
+
 
 
 
