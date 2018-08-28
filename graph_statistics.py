@@ -24,7 +24,10 @@ class GraphStatistics:
     def number_of_edges(self):
         c = 0
         for sender in self.adj_list:
-            c += len(self.adj_list[sender])
+            receivers = self.adj_list[sender]
+            for v in receivers:
+                if v in self.adj_list:
+                    c += 1
         return c
 
     def max_edges(self):
