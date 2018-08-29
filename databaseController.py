@@ -14,7 +14,7 @@ conn = psycopg2.connect("dbname=testsnagraphs user=eldar")
 Some notes about psycopg, its trash.
 Details: There does not seem to be safe built in error catching for very simple exception scenarios,
 such as foreign key violations, meaning that these will need to be caught with try/except clauses
-because the whole program crashes if the database is not happy with you 
+because the whole program crashes if the database is not happy with you
 """
 
 def RunQuery (qString):

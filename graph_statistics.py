@@ -138,8 +138,27 @@ class GraphStatistics:
                     h_centrality += (1 / len(path))
         return h_centrality
 
-    def eigenvector_centrality(self):
-        return self.graph_as_adj_matrix()
+    # run and return a calculation of eigenvector centrality on self.adj_list
+    ## Input : iterations 
+    ## Output: dictionary of { nodeId: e_centrality }
+    def eigenvector_centrality(self, iterations = 100):
+        vectorSet = {}
+        for key, value in self.adj_list.items():
+            vectorSet[key] = 1 # init vectorSet of everything = 1
+
+        for i in iterations:
+            for sender in self.adj_list:
+                for r in sender:
+                    vectorSet[sender] += 1
+
+        sum = 0
+        for key, value in vectorSet:
+            sum += value
+        
+        for key, value in vectorSet:
+            vectorSet[key] = vectorSet[key] / sum
+
+        return vectorSet
 
     def graph_as_adj_matrix(self):
         matrix_order = {}
@@ -161,6 +180,7 @@ class GraphStatistics:
 
 
 
+if __name__ == "__main__":
 
 
 

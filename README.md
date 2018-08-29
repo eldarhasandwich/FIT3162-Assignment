@@ -29,6 +29,17 @@ Populate the DB
 psql -f snagraphs.sql
 ```
 
+## Tests
+
+Get pytest 
+```
+pip install -U pytest
+```
+
+Run tests
+```
+pytest
+```
 
 ## Dev notes
 
