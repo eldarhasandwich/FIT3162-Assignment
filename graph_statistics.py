@@ -148,7 +148,7 @@ class GraphStatistics:
         for i in range(iterations):
             for sender in self.adj_list:
                 for r in sender:
-                    vectorSet[sender] += 1
+                    vectorSet[sender] = vectorSet[sender] + 1
 
         sum = 0
         for key, value in vectorSet.items():
@@ -177,10 +177,6 @@ class GraphStatistics:
                     adj_matrix[row][col] = 1
         return adj_matrix
 
-
-
 if __name__ == "__main__":
     pass
-
-
-
+    

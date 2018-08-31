@@ -31,7 +31,16 @@ def EnronOutputToAdjList():
 
     return adjList
 
-
+# returns message, isValid
+def EnronOutputIsValid(file):
+    text = file.read()
+    file.close()
+    lines = text.split("\n")
+    for line in lines:
+        words = line.split(" ")
+        if words[0] != "Email" or words[1] != "sent" or words[2] != "by" or words[4] != "to":
+            return "Error: " + line + " is an invalid line", False
+    return "This file can be parsed", True
 
 if __name__ == "__main__":
     adj_list = EnronOutputToAdjList()

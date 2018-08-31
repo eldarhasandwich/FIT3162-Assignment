@@ -9,7 +9,8 @@
   "test_graph_statistics.py::test_max_edges",
   "test_graph_statistics.py::test_get_density",
   "test_graph_statistics.py::test_degree_centalitry",
-  "test_graph_statistics.py::test_betweennes_centrality",
+  "test_graph_statistics.py::test_shortest_path",
+  "test_graph_statistics.py::test_betweenness_centrality",
   "test_graph_statistics.py::test_closeness_centrality",
   "test_graph_statistics.py::test_harmonic_centrality",
   "test_graph_statistics.py::test_eigenvector_centralityy"

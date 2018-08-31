@@ -55,7 +55,17 @@ def test_degree_centalitry():
     assert gs.degree_centrality('3') == 3
     assert gs.degree_centrality('4') == 1
 
-def test_betweennes_centrality():
+def test_shortest_path():
+    gs = init_graphStats()
+
+    assert gs.shortest_path_between_two_nodes('1', '2') == ['2', '1']
+    assert gs.shortest_path_between_two_nodes('1', '3') == ['3', '1']
+    assert gs.shortest_path_between_two_nodes('1', '4') == ['4', '1'] #
+    assert gs.shortest_path_between_two_nodes('2', '3') == ['3', '2']
+    assert gs.shortest_path_between_two_nodes('2', '4') == ['4', '1', '2']
+    assert gs.shortest_path_between_two_nodes('3', '4') == ['4', '3']
+
+def test_betweenness_centrality():
     gs = init_graphStats()
 
     assert gs.betweenness_centrality('1') == 7
@@ -85,3 +95,4 @@ def test_eigenvector_centralityy():
     eCentrality = gs.eigenvector_centrality(100)
 
     assert eCentrality == {'1': 0.25, '2': 0.25, '3': 0.25, '4': 0.25}
+    

@@ -21,6 +21,8 @@ def test_sender_number_of_recipients():
     assert adjList.senders['1'].number_of_recipients() == 2
     assert adjList.senders['2'].number_of_recipients() == 2
     assert adjList.senders['3'].number_of_recipients() == 3
+    assert adjList.senders['4'].number_of_recipients() == 1
+
 
 def test_sender_to_string():
     adjList = init_adjlist()
