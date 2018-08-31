@@ -38,7 +38,6 @@ class GraphStatistics:
         max_number_of_edges = self.max_edges()
         return float(edges / max_number_of_edges)
 
-
     def shortest_path_between_two_nodes(self, start, end):
         path_found = False
         visited = {i: False for i in self.adj_list}
@@ -53,6 +52,8 @@ class GraphStatistics:
                 visited[vertex] = True
                 if prev_node:
                     previous[vertex] = prev_node
+                else:
+                    previous[vertex] = None
                 if vertex in self.adj_list:
                     edges = self.adj_list[vertex]
                     for node in edges:
@@ -61,15 +62,12 @@ class GraphStatistics:
                             my_queue.append(node)
                             if node == end:
                                 path_found = True
-                                if not prev_node:
-                                    prev_node = vertex
-                                previous[node] = prev_node
+                                previous[node] = vertex
                                 break
 
                 prev_node = vertex
                 if path_found:
                     break
-
 
         if not path_found:
             return None
