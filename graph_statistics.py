@@ -87,7 +87,7 @@ class GraphStatistics:
                 if i != j:
                     shortest_path = self.shortest_path_between_two_nodes(i, j)
                     if shortest_path:
-                        paths.append(shortest_path)
+                        paths.append((shortest_path, (i, j)))
         return paths
 
     def degree_centrality(self, node):
@@ -176,5 +176,14 @@ class GraphStatistics:
         return adj_matrix
 
 if __name__ == "__main__":
-    pass
-    
+    adj_list = {"1": ["2", "3"], "2": ["1", "3"], "3": ["1", "2", "4"], "4":["3"]}
+
+    graph_stats = GraphStatistics()
+    graph_stats.adj_list = adj_list
+    print(graph_stats.shortest_path_between_two_nodes("2", "4"))
+    my_paths = graph_stats.all_shortest_paths()
+    for path in my_paths:
+        i = path[1][0]
+        j = path[1][1]
+        path = path[0]
+        print("Shortest path between {0} and {1} is {2}".format(i, j, path))
