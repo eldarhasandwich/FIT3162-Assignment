@@ -1,3 +1,8 @@
 [
-  "test_python.py::test_ass"
+  "test_adjacency_list.py::test_sender_number_of_recipients",
+  "test_adjacency_list.py::test_sender_to_string",
+  "test_adjacency_list.py::test_sender_emailAddress",
+  "test_adjacency_list.py::test_recipients_as_list",
+  "test_adjacency_list.py::test_adding_pairs",
+  "test_graph_statistics.py::test_ass"
 ]
