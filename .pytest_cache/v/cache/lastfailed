@@ -1,3 +1,4 @@
 {
-  "test_python.py::test_ass": true
+  "test/test_graph_statistics.py": true,
+  "test/test_python.py::test_ass": true
 }

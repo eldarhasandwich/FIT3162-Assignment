@@ -8,6 +8,7 @@ import pyqtgraph as pg
 import appController as AppC
 import databaseController as DBC
 import enron_output_to_adjlist as enron
+import graph_statistics as GS
 
 class Application(QTabWidget):
     def __init__(self, parent = None):
