@@ -4,5 +4,13 @@
   "test_adjacency_list.py::test_sender_emailAddress",
   "test_adjacency_list.py::test_recipients_as_list",
   "test_adjacency_list.py::test_adding_pairs",
-  "test_graph_statistics.py::test_ass"
+  "test_graph_statistics.py::test_number_of_nodes",
+  "test_graph_statistics.py::test_number_of_edges",
+  "test_graph_statistics.py::test_max_edges",
+  "test_graph_statistics.py::test_get_density",
+  "test_graph_statistics.py::test_degree_centalitry",
+  "test_graph_statistics.py::test_betweennes_centrality",
+  "test_graph_statistics.py::test_closeness_centrality",
+  "test_graph_statistics.py::test_harmonic_centrality",
+  "test_graph_statistics.py::test_eigenvector_centralityy"
 ]

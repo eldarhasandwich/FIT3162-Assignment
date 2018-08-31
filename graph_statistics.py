@@ -13,7 +13,6 @@ class GraphStatistics:
         if sender not in self.adj_list:
             self.adj_list[sender_key] = recipients
 
-
     def print_nodes(self):
         for node in self.adj_list:
             print(node)
@@ -26,7 +25,7 @@ class GraphStatistics:
         for sender in self.adj_list:
             receivers = self.adj_list[sender]
             for v in receivers:
-                if v in self.adj_list:
+                if v[0] in self.adj_list:
                     c += 1
         return c
 
@@ -146,16 +145,16 @@ class GraphStatistics:
         for key, value in self.adj_list.items():
             vectorSet[key] = 1 # init vectorSet of everything = 1
 
-        for i in iterations:
+        for i in range(iterations):
             for sender in self.adj_list:
                 for r in sender:
                     vectorSet[sender] += 1
 
         sum = 0
-        for key, value in vectorSet:
+        for key, value in vectorSet.items():
             sum += value
         
-        for key, value in vectorSet:
+        for key, value in vectorSet.items():
             vectorSet[key] = vectorSet[key] / sum
 
         return vectorSet

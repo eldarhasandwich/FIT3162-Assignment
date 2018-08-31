@@ -20,7 +20,7 @@ def test_sender_number_of_recipients():
     
     assert adjList.senders['1'].number_of_recipients() == 2
     assert adjList.senders['2'].number_of_recipients() == 2
-    assert adjList.senders['3'].number_of_recipients() == 2
+    assert adjList.senders['3'].number_of_recipients() == 3
 
 def test_sender_to_string():
     adjList = init_adjlist()
@@ -45,7 +45,7 @@ def test_recipients_as_list():
 
     assert bobList == [('2', 5), ('3', 6)]
     assert jimList == [('3', 2), ('1', 1)]
-    assert gregList == [('2', 3), ('1', 7)]
+    assert gregList == [('2', 3), ('1', 7), ('4', 3)]
 
 def test_adding_pairs():
     adjList = init_adjlist()
