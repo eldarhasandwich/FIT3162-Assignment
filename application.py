@@ -3,6 +3,11 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import networkx as nx
+
 import pyqtgraph as pg
 
 import appController as AppC
@@ -16,6 +21,7 @@ class Application(QTabWidget):
 
         self.selectedGraphId = None
         self.loadedGraphs = {}
+        self.loadedGraphsStats = {}
 
         self.graphList = QListWidget()
         self.graphList.itemClicked.connect(self.graphItemClicked)
@@ -33,6 +39,9 @@ class Application(QTabWidget):
         self.addTab(self.tab2,"Tab 2")
         self.tab2UI()
         ##--
+
+        self.dropdownItems = []
+        self.statDropdown = QComboBox()
 
         self.tab3 = QWidget()
         self.addTab(self.tab3,"Tab 3")
@@ -57,7 +66,18 @@ class Application(QTabWidget):
     def loadSelectedGraph(self):
         if self.selectedGraphId == None: return
         adjList = DBC.PullListFromDB(self.selectedGraphId)
+        graphStat = GS.GraphStatistics()
+        graphStat.import_adjacency_list(adjList)
+
         self.loadedGraphs[self.selectedGraphId] = adjList
+        self.loadedGraphsStats[self.selectedGraphId] = graphStat
+
+        self.dropdownItems = graphStat.GetAllStatisticalMethods()
+        for i in range(len(self.dropdownItems)):
+            self.dropdownItems[i] = self.dropdownItems[i][1]
+        self.statDropdown.clear()
+        self.statDropdown.addItems(self.dropdownItems)
+
         print("list loading complete")
 
     def tab1UI(self): # graph display
@@ -75,9 +95,9 @@ class Application(QTabWidget):
         layout.addWidget(loadBtn, 2, 0)
 
         graphLabel = QLabel("Graph")
-        graph = pg.PlotWidget()
+        # graph = nx.DiGraph()
         layout.addWidget(graphLabel, 0, 1)
-        layout.addWidget(graph, 1, 1)
+        # layout.addWidget(graph, 1, 1)
 
         self.refreshGraphList()
 
@@ -131,13 +151,13 @@ class Application(QTabWidget):
     def tab3UI(self): # analysis selection 
         layout = QFormLayout()
 
-        dropdown = QComboBox()
-        dropdown.addItems(["something", "something else", "who cares"])
+        # dropdown = QComboBox()
+        # dropdown.addItems(["something", "something else", "who cares"])
 
         submitBtn = QPushButton("Run Analysis")
 
         layout.addRow(QLabel("Run Analysis on Graph"))
-        layout.addRow(dropdown)
+        layout.addRow(self.statDropdown)
         layout.addRow(QLabel("This analysis blah blah blah"))
         layout.addRow(submitBtn)  
 

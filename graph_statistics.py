@@ -5,6 +5,10 @@ class GraphStatistics:
     def __init__(self):
         self.adj_list = {}
 
+    def import_adjacency_list(self, adjList):
+        pass
+        for skey, sender in adjList.senders.items():
+            self.add_data(sender)
 
     def add_data(self, sender):
         assert isinstance(sender, AL.Sender)
@@ -174,6 +178,16 @@ class GraphStatistics:
                     col = matrix_order[recipient]
                     adj_matrix[row][col] = 1
         return adj_matrix
+
+    def GetAllStatisticalMethods(self):
+        return [
+            (self.get_density, 'Density'),
+            (self.degree_centrality, 'Degree Centrality'),
+            (self.betweenness_centrality, 'Betweenness Centrality'),
+            (self.closeness_centrality, 'Closeness Centrality'),
+            (self.harmonic_centrality, 'Harmonic Centrality'),
+            (self.eigenvector_centrality, 'Eigenvector Centrality')
+        ]
 
 if __name__ == "__main__":
     adj_list = {"1": ["2", "3"], "2": ["1", "3"], "3": ["1", "2", "4"], "4":["3"]}
