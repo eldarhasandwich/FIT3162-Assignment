@@ -98,6 +98,9 @@ class Application(QTabWidget):
         # graph = nx.DiGraph()
         layout.addWidget(graphLabel, 0, 1)
         # layout.addWidget(graph, 1, 1)
+        toFileBtn = QPushButton("Save to Output.txt")
+        toFileBtn.clicked.connect(self.adjListToOutputFile)
+        layout.addWidget(toFileBtn, 1, 1)
 
         self.refreshGraphList()
 
@@ -111,12 +114,14 @@ class Application(QTabWidget):
         fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","All Files (*);;Python Files (*.py)", options=options)
         if fileName:
             print(fileName)
-            self.fileSelectionSelectedFile = open(fileName, "r")
+            f = open(fileName, 'r')
+            print(f)
+            self.fileSelectionSelectedFile = f.read()
+            f.close()
             self.fileSelectionSelectedFileName = fileName.split('/')[-1]
             msg, isValid = enron.EnronOutputIsValid(self.fileSelectionSelectedFile)
             self.fileSelectionDescription.setText(self.fileSelectionSelectedFileName + ": " + msg)
             self.fileCanBeParsed = isValid
-
 
     def parseTxtFileIntoDB(self):
         if not self.fileCanBeParsed:
@@ -127,6 +132,28 @@ class Application(QTabWidget):
         self.fileSelectionDescription.setText("Select a file first.")
         self.refreshGraphList()
         self.fileCanBeParsed = False
+
+    def adjListToOutputFile(self):
+        if self.selectedGraphId not in self.loadedGraphs:
+            return
+        outputAdjlist = self.loadedGraphs[self.selectedGraphId]
+        f = open('output.txt', 'w') 
+        outputNodes = {}
+        outputEdges = []
+        for skey, sender in outputAdjlist.senders.items():
+            if sender.id not in outputNodes:
+                outputNodes[sender.id] = sender.emailAddress
+            for rkey2, recipient in sender.recipients.items():
+                
+                if recipient.id in outputNodes:
+                    outputEdges.append(str(sender.id) + " " + str(recipient.id) + " " + str(recipient.emailCount))
+        f.write('NODES\n')
+        for key, node in outputNodes.items():
+            f.write(str(key) + ' ' + str(node) + '\n')
+        f.write('EDGES\n')
+        for line in outputEdges:
+            f.write(line + '\n')
+        f.close()
 
     def tab2UI(self): # file selection
         layout = QFormLayout()

@@ -31,10 +31,20 @@ def EnronOutputToAdjList():
 
     return adjList
 
+def TxtToAdjList(text):
+    lines = text.split("\n")
+
+    adjList = AL.AdjacencyList()
+    for l in lines:
+        s, r = LineToIndividuals(l)
+
+        for recip in r:
+            adjList.AddSenderRecipientPair(s, s, recip, recip)
+
+    return adjList
+
 # returns message, isValid
-def EnronOutputIsValid(file):
-    text = file.read()
-    file.close()
+def EnronOutputIsValid(text):
     lines = text.split("\n")
     for line in lines:
         words = line.split(" ")
