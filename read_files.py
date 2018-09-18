@@ -148,6 +148,8 @@ class Group:
         self.adj_list = self.cons_adj_list()
         self.add_initial_values()
 
+    def get_size(self):
+        return len(self.sorted_members)
 
     def cons_id_dict(self):
         a_dict = {}
@@ -198,25 +200,34 @@ class Group:
                             output.write("\n")
             output.write("\n")
 
+    def number_of_members(self):
+        return len(list(self.adj_list))
+
 
 class Groups:
     def __init__(self):
         self.elements = {}
+        self.sizes = {}
         self.c = 0
 
     def add(self, members):
         assert isinstance(members, list)
-        assert len(members) > 2
-        sender = members[0]
-        receivers = members[1:]
-        members.sort()
-        key = self.create_dict_key(members)
-        if key not in self.elements:
-            print(key)
-            self.c += 1
-            self.elements[key] = Group(members, sender, receivers, key)
-        else:
-            self.elements[key].add_email(sender, receivers)
+        members = list(set(members))
+        N = len(members)
+        if N >= 2:
+            if N not in self.sizes:
+                self.sizes[N] = 0
+            else:
+                self.sizes[N] += 1
+            sender = members[0]
+            receivers = members[1:]
+            members.sort()
+            key = self.create_dict_key(members)
+            if key not in self.elements:
+                self.c += 1
+                self.elements[key] = Group(members, sender, receivers, key)
+            else:
+                self.elements[key].add_email(sender, receivers)
 
     def create_dict_key(self, members):
         my_str = " "
@@ -224,11 +235,13 @@ class Groups:
             my_str += str(e) + ", "
         return my_str[:-2]
 
-    def write_groups_to_file(self, output):
-        all_groups = self.elements
-        for key in all_groups:
-            all_groups[key].write_to_file(output)
-        output.write("{0} total groups.".format(self.c))
+    def dyad_count(self):
+        return self.sizes[2]
+
+    def triad_count(self):
+        return self.sizes[3]
+
+
 
 
 def main():
@@ -237,7 +250,6 @@ def main():
     group_output = open("output.txt", 'w')
     file_processor = FileProcessor(my_directory)
     all_emails = file_processor.process_directory_files()
-    file_processor.groups.write_groups_to_file(group_output)
     total_files = file_processor.file_count
     end = time.time()
     print("{0} files read in {1}".format(total_files, end - start))
