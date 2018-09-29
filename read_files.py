@@ -1,34 +1,61 @@
-import os, re, string, time
+import math, os, re, string, time
 
-class FileProcessor:
-    def __init__(self, directory):
-        self.directory = directory
+
+#Processes the files of a provided directory
+class DirectoryProcessor:
+    def __init__(self, a_directory):
+        self.directory = a_directory
+        self.parser = Parser()
+        self.email_reader = EmailReader()
+        self.file_count = 0
+        self.file_limit = math.inf
+
+    #iterate through the files in directory
+    #and give to parser class
+    def process_files(self):
+        file_type = "enron"
+        for dir_name, subdir, file_list in os.walk(self.directory):
+            if self.file_count < self.file_limit:
+                for file in file_list:
+                    self.file_count += 1
+                    file_location = self.concatenate_file_location(dir_name, file)
+                    self.parser.process_file(file_location, file_type)
+
+
+
+
+    #helper function for creating path strings
+    def concatenate_file_location(self, dir_name, file_name):
+        return str(dir_name + "\\" + file_name)
+
+
+#added some basic abstraction for the parser
+#will make life a lot easier for implementing other parsers
+
+class Parser:
+    def __init__(self):
         self.email_reader = EmailReader()
         self.email_container = EmailContainer()
         self.groups = Groups()
-        self.file_count = 0
-        self.file_limit = 500000000
+        self.file_types = ["enron", "foo", "bar"]
 
-    def process_directory_files(self):
-        file_type = "sent"
-        my_emails = []
-        for dir_name, subdir, file_list in os.walk(self.directory):
-            if self.file_count < self.file_limit:
-                for file_name in file_list:
-                    self.file_count += 1
-                    file_location = self.concatenate_file_location(dir_name, file_name)
-                    sender, receivers, id, group_members = self.email_reader.get_email_attributes(file_location)
-                    if sender and receivers and id:
-                        if self.email_container.email_is_unique(sender, receivers, id):
-                            self.email_container.add_email(sender, receivers, id)
+    def process_file(self, file, file_type):
+        if file_type in self.file_types:
+            if file_type == "enron":
+                self.process_enron_file(file)
+            elif file_type == "foo":
+                pass
+                #logic for second parser
+            elif file_type == "bar":
+                pass
+                #logic for third parser
 
-                    if group_members:
-                        self.groups.add(group_members)
-
-        return my_emails
-
-    def concatenate_file_location(self, dir_name, file_name):
-        return str(dir_name + "\\" + file_name)
+    def process_enron_file(self, file):
+        sender, receivers, id, group_members = self.email_reader.get_email_attributes(file)
+        if sender and receivers and id:
+            self.email_container.add_email(sender, receivers, id)
+        if group_members:
+            self.groups.add(group_members)
 
 class EmailReader:
     def __init__(self):
@@ -36,9 +63,14 @@ class EmailReader:
 
     def get_email_attributes(self, email):
         sender, receivers, id, group_members = None, None, None, None
+        line_count = 0
+        line_limit = 10
         with open(email, 'r') as f:
             contents = f.readlines()
             for line in contents:
+                if line_count == line_limit:
+                    break #exit early for efficiency
+                line_count += 1
                 line = line.rstrip('\n')
                 if not id:
                     id = self.get_id(line)
@@ -47,7 +79,7 @@ class EmailReader:
                 if not receivers:
                     receivers = self.get_receivers(line)
                 if sender and receivers and id:
-                    if len(receivers) > 1:
+                    if len(receivers) > 0:
                         group_members = self.create_group(sender, receivers)
                     break
         return sender, receivers, id, group_members
@@ -74,7 +106,10 @@ class EmailReader:
                 return receivers
 
     def address_is_valid(self, a_string):
-        return self.email_structure_is_correct(a_string)
+        m = re.search(r"^[a-z]+([.])[a-z]+$", a_string)
+        if m:
+            return True
+        return False
 
     def remove_punctuation(self, a_string):
         return a_string.translate(string.punctuation)
@@ -103,40 +138,36 @@ class EmailReader:
             email_str = email_str[j:][::-1]
         return email_str
 
-    def email_structure_is_correct(self, a_string):
-        m = re.search(r"^[a-z]+([.])[a-z]+$", a_string)
-        if m:
-            return True
-        return False
 
+#object storing attributes of all emails that matched
 class Email:
     def __init__(self, sender, receivers, message_id):
         self.sender = sender
         self.receivers = receivers
         self.message_id = message_id
 
-    @staticmethod
-    def static_identifier_string(sender, receivers, message_id):
+    def identifier_string(self, sender, receivers, message_id):
         return str(sender + " " + ', '.join(receivers) + ' {0}'.format(message_id))
 
-    def identifier_string(self):
-        return str(self.sender + " " + ', '.join(self.receivers) + ' {0}'.format(self.message_id))
-
+#stores all email objects and removes duplicates
 class EmailContainer:
     def __init__(self):
-        self.email_identifiers = {}
         self.unique_emails = []
 
-    def email_is_unique(self, sender, receivers, id):
-        return Email.static_identifier_string(sender, receivers, id) not in self.email_identifiers
+    def email_is_unique(self, id):
+        for email in self.unique_emails:
+            email_id = email.message_id
+            if email_id == id: #matching ids, must be duplicate
+                return False
+        return True
 
     def add_email(self, sender, receivers, id):
-        self.email_identifiers[Email.static_identifier_string(sender, receivers, id)] = True
-        self.unique_emails.append(Email(sender, receivers, id))
+        if self.email_is_unique(id):
+            self.unique_emails.append(Email(sender, receivers, id))
 
-    def get_emails(self):
-        return self.unique_emails
 
+#group class, stores information about communication flows between recurring clusters of employees
+#currently only utilising this class for dyad/tryad counts
 class Group:
     def __init__(self, sorted_members, sender, receivers, key):
         self.sorted_members = sorted_members
@@ -204,30 +235,32 @@ class Group:
         return len(list(self.adj_list))
 
 
+#container class for group objects
 class Groups:
     def __init__(self):
         self.elements = {}
         self.sizes = {}
         self.c = 0
 
+    #provided a list of members
     def add(self, members):
         assert isinstance(members, list)
         members = list(set(members))
         N = len(members)
         if N >= 2:
             if N not in self.sizes:
-                self.sizes[N] = 0
+                self.sizes[N] = 1
             else:
                 self.sizes[N] += 1
             sender = members[0]
             receivers = members[1:]
-            members.sort()
-            key = self.create_dict_key(members)
-            if key not in self.elements:
+            members.sort() #sort the members in a group
+            key = self.create_dict_key(members) #generate the dictionary key
+            if key not in self.elements: #if group doesnt exist
                 self.c += 1
-                self.elements[key] = Group(members, sender, receivers, key)
+                self.elements[key] = Group(members, sender, receivers, key) #create
             else:
-                self.elements[key].add_email(sender, receivers)
+                self.elements[key].add_email(sender, receivers) #add email data to existing group instance
 
     def create_dict_key(self, members):
         my_str = " "
@@ -235,26 +268,27 @@ class Groups:
             my_str += str(e) + ", "
         return my_str[:-2]
 
+    def groups_of_size(self, N):
+        if self.sizes[N]:
+            return self.sizes[N]
+        else:
+            return 0
+
     def dyad_count(self):
-        return self.sizes[2]
+        return self.groups_of_size(2)
 
     def triad_count(self):
-        return self.sizes[3]
+        return self.groups_of_size(3)
 
 
 
+start = time.time()
+my_directory = "C:\\Users\\Valued Customer\\Desktop\\maildir"
+group_output = open("output.txt", 'w')
+directory_processor = DirectoryProcessor(my_directory)
+end = time.time()
 
-def main():
-    start = time.time()
-    my_directory = "C:\\Users\\Valued Customer\\Desktop\\maildir"
-    group_output = open("output.txt", 'w')
-    file_processor = FileProcessor(my_directory)
-    all_emails = file_processor.process_directory_files()
-    total_files = file_processor.file_count
-    end = time.time()
-    print("{0} files read in {1}".format(total_files, end - start))
 
-if __name__ == "__main__":
-    main()
+
 
 
