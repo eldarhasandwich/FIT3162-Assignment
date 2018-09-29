@@ -280,8 +280,6 @@ class Groups:
     def triad_count(self):
         return self.groups_of_size(3)
 
-
-
 start = time.time()
 my_directory = "C:\\Users\\Valued Customer\\Desktop\\maildir"
 group_output = open("output.txt", 'w')
