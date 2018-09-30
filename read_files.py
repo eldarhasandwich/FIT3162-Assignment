@@ -6,28 +6,19 @@ class DirectoryProcessor:
     def __init__(self, a_directory):
         self.directory = a_directory
         self.parser = Parser()
-        self.email_reader = EmailReader()
         self.file_count = 0
         self.file_limit = math.inf
 
     #iterate through the files in directory
-    #and give to parser class
+    #and give to parser
     def process_files(self):
         file_type = "enron"
         for dir_name, subdir, file_list in os.walk(self.directory):
             if self.file_count < self.file_limit:
                 for file in file_list:
                     self.file_count += 1
-                    file_location = self.concatenate_file_location(dir_name, file)
+                    file_location = str(dir_name + "\\" + file)
                     self.parser.process_file(file_location, file_type)
-
-
-
-
-    #helper function for creating path strings
-    def concatenate_file_location(self, dir_name, file_name):
-        return str(dir_name + "\\" + file_name)
-
 
 #added some basic abstraction for the parser
 #will make life a lot easier for implementing other parsers
@@ -126,8 +117,8 @@ class EmailReader:
 
     def get_email_address(self, a_string):
         email_suffix = "@enron.com"
-        email_str = ""
         if a_string.endswith(email_suffix):
+            email_str = ""
             i = len(a_string) - 1
             while a_string[i] != " " and i >= 0:
                 char = a_string[i]
@@ -136,8 +127,8 @@ class EmailReader:
             email_str.join(email_str.split())
             j = len(email_suffix)
             email_str = email_str[j:][::-1]
-        return email_str
-
+            return email_str
+        return None
 
 #object storing attributes of all emails that matched
 class Email:
@@ -153,6 +144,7 @@ class Email:
 class EmailContainer:
     def __init__(self):
         self.unique_emails = []
+        self.duplicate_emails = []
 
     def email_is_unique(self, id):
         for email in self.unique_emails:
@@ -162,8 +154,11 @@ class EmailContainer:
         return True
 
     def add_email(self, sender, receivers, id):
+        email = Email(sender, receivers, id)
         if self.email_is_unique(id):
-            self.unique_emails.append(Email(sender, receivers, id))
+            self.unique_emails.append(email)
+        else:
+            self.duplicate_emails.append(email)
 
 
 #group class, stores information about communication flows between recurring clusters of employees
@@ -240,11 +235,13 @@ class Groups:
     def __init__(self):
         self.elements = {}
         self.sizes = {}
-        self.c = 0
+        self.count = 0
 
     #provided a list of members
     def add(self, members):
         assert isinstance(members, list)
+        sender = members[0]
+        receivers = members[1:]
         members = list(set(members))
         N = len(members)
         if N >= 2:
@@ -252,12 +249,10 @@ class Groups:
                 self.sizes[N] = 1
             else:
                 self.sizes[N] += 1
-            sender = members[0]
-            receivers = members[1:]
             members.sort() #sort the members in a group
             key = self.create_dict_key(members) #generate the dictionary key
             if key not in self.elements: #if group doesnt exist
-                self.c += 1
+                self.count += 1
                 self.elements[key] = Group(members, sender, receivers, key) #create
             else:
                 self.elements[key].add_email(sender, receivers) #add email data to existing group instance
