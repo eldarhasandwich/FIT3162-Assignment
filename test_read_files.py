@@ -18,7 +18,7 @@ def test_sender():
 
 def test_receiver():
     test_string = "lwbthemarine@bigplanet.com"
-    assert test_reader.get_email_address(test_string) == None
+    assert test_reader.get_email_address(test_string) is None
 
 
 def test_enron_address():
@@ -31,11 +31,6 @@ def test_regex_1():
     assert not test_reader.address_is_valid(test_string)
 
 
-def test_regex_2():
-    test_string = "eric.bass"
-    assert test_reader.address_is_valid(test_string)
-
-
 def test_regex_3():
     a_string = "timothy.blanchard@enron.com"
     test_string = test_reader.get_email_address(a_string)
@@ -45,16 +40,18 @@ def test_regex_3():
 def test_duplicate_emails():
     sender = "sender"
     receiver = ["receiver"]
-    id = "1"
-    test_email_container.add_email(sender, receiver, id)
-    assert not test_email_container.email_is_unique(id)
+    msg_id = "1"
+    test_email_container.add_email(sender, receiver, msg_id)
+    assert not test_email_container.email_is_unique(msg_id)
 
 def test_group_1():
     test_groups = Groups()
     group_1 = ["a", "b", "c"]
-    group_2 = ["a", "c", "b"]
+    group_2 = ["a", "b", "c"]
+    group_3 = ["a", "c", "b"]
     test_groups.add(group_1)
     test_groups.add(group_2)
+    test_groups.add(group_3)
     assert test_groups.count == 1
 
 def test_group_2():
@@ -65,3 +62,4 @@ def test_group_2():
     test_groups.add(group_2)
     assert test_groups.count == 2
 
+test_group_1()

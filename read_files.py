@@ -91,8 +91,10 @@ class EmailReader:
             for receiver in all_receivers:
                 cleaned_receiver = self.remove_punctuation(receiver)
                 receiver_name = self.get_email_address(cleaned_receiver)
-                if self.address_is_valid(receiver_name):
-                    receivers.append(receiver_name)
+                if receiver_name:
+                    if self.address_is_valid(receiver_name):
+                        receivers.append(receiver_name)
+
             if len(receivers) > 0:
                 return receivers
 
@@ -101,6 +103,7 @@ class EmailReader:
         if m:
             return True
         return False
+
 
     def remove_punctuation(self, a_string):
         return a_string.translate(string.punctuation)
@@ -140,11 +143,21 @@ class Email:
     def identifier_string(self, sender, receivers, message_id):
         return str(sender + " " + ', '.join(receivers) + ' {0}'.format(message_id))
 
+    def output_string(self):
+        a_str = "Email sent by {0} to ".format(self.sender)
+        for r in range(0, len(self.receivers) - 1):
+            receiver = self.receivers[r]
+            a_str += receiver+", "
+        a_str += self.receivers[-1]
+        return a_str
+
 #stores all email objects and removes duplicates
 class EmailContainer:
     def __init__(self):
         self.unique_emails = []
         self.duplicate_emails = []
+        self.invalid_emails = []
+
 
     def email_is_unique(self, id):
         for email in self.unique_emails:
@@ -159,6 +172,17 @@ class EmailContainer:
             self.unique_emails.append(email)
         else:
             self.duplicate_emails.append(email)
+
+    def number_of_duplicates(self):
+        return len(self.duplicate_emails)
+
+    def write_to_file(self, output):
+        for email in self.unique_emails:
+            email_string = email.output_string()
+            output.write(email_string)
+            output.write("\n")
+
+
 
 
 #group class, stores information about communication flows between recurring clusters of employees
@@ -275,11 +299,25 @@ class Groups:
     def triad_count(self):
         return self.groups_of_size(3)
 
-start = time.time()
+    def write_statistics_to_file(self, output):
+        output.write("Dyad count: " + str(self.dyad_count()))
+        output.write("\n")
+        output.write("Triad count: " + str(self.triad_count()))
+        output.write("\n")
+
+
 my_directory = "C:\\Users\\Valued Customer\\Desktop\\maildir"
 group_output = open("output.txt", 'w')
 directory_processor = DirectoryProcessor(my_directory)
-end = time.time()
+directory_processor.process_files()
+parser = directory_processor.parser
+emails = parser.email_container
+groups = parser.groups
+output = open("final_output.txt", 'w')
+emails.write_to_file(output)
+groups.write_statistics_to_file(output)
+
+
 
 
 
