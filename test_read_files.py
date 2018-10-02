@@ -8,7 +8,7 @@ test_email_container = EmailContainer()
 
 def test_message_id():
     message_id = "Message-ID: <29242476.1075840325974.JavaMail.evans@thyme>"
-    assert test_reader.get_id(message_id) == "292424761075840325974"
+    assert test_reader.get_msg_id(message_id) == "292424761075840325974"
 
 
 def test_sender():
@@ -23,19 +23,19 @@ def test_receiver():
 
 def test_enron_address():
     test_string = "eric.bass"
-    assert test_reader.address_is_valid(test_string)
+    assert test_reader.matches_regex(test_string)
 
 
 def test_regex_1():
     test_string = "123.abc"
-    assert not test_reader.address_is_valid(test_string)
+    assert not test_reader.matches_regex(test_string)
 
 
 def test_regex_3():
     a_string = "timothy.blanchard@enron.com"
     test_string = test_reader.get_email_address(a_string)
     assert test_string == "timothy.blanchard"
-    assert test_reader.address_is_valid(test_string)
+    assert test_reader.matches_regex(test_string)
 
 def test_duplicate_emails():
     sender = "sender"
