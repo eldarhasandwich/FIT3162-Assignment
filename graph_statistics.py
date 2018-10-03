@@ -35,7 +35,7 @@ class GraphStatistics:
 
     def max_edges(self):
         vertices = self.number_of_nodes()
-        return (vertices * (vertices-1))
+        return vertices * (vertices-1)
 
     def get_density(self):
         edges = self.number_of_edges()

@@ -8,7 +8,7 @@ class DirectoryProcessor:
     def __init__(self):
         self.parser = Parser()
         self.file_count = 0
-        self.file_limit = math.inf
+        self.file_limit = 500#math.inf
 
     def process_files(self, a_directory):
         """Iterate through a given directory and pass each directory file to the parser.
@@ -39,8 +39,7 @@ class DirectoryProcessor:
 
 class Parser:
     def __init__(self):
-        self.email_reader = EmailReader()
-        self.email_container = EmailContainer()
+        self.enron_parser = EnronParser()
         self.groups = Groups()
         self.file_types = ["enron", "parser2", "parser3"]
 
@@ -56,13 +55,20 @@ class Parser:
         """
         if file_type in self.file_types:
             if file_type == "enron":
-                self.process_enron_file(file)
+                self.enron_parser.process_file(file, self.groups)
             elif file_type == "parser2":
                 pass
             elif file_type == "parser3":
                 pass
 
-    def process_enron_file(self, file):
+
+
+class EnronParser:
+    def __init__(self):
+        self.email_reader = EmailReader()
+        self.email_container = EmailContainer()
+
+    def process_file(self, file, groups):
         """Analyse an enron file to determine its key attributes if they exist.
            These attributes are the sender, receiver(s), message_id and groups.
 
@@ -76,11 +82,11 @@ class Parser:
         sender, receivers, msg_id = self.email_reader.get_email_attributes(file)
         if self.attributes_are_valid(sender, receivers):
             self.email_container.add_email(sender, receivers, msg_id)
-            self.groups.add(sender, receivers)
+            groups.add(sender, receivers)
 
     def attributes_are_valid(self, sender, receivers):
         if sender is None or len(receivers) == 0:
-           return False
+            return False
         else:
             return True
 
@@ -104,34 +110,61 @@ class EmailReader:
         """
         sender, receivers, msg_id = None, None, None
         with open(email, 'r') as f:
-            contents = f.readlines()[:4]
+            contents = f.readlines()
             for i, line in enumerate(contents):
-                line = line.rstrip('\n')
+                line = self.clean_line(line)
                 if i == 0:
                     msg_id = self.get_msg_id(line)
-                if i == 2:
+                elif i == 1:
+                    pass
+                elif i == 2:
                     sender = self.get_sender(line)
-                if i == 3:
-                    receivers = self.get_receivers(line)
+                else:
+                    receivers = self.get_all_receivers(contents[3:])
                     break
-
         return sender, receivers, msg_id
 
+    def get_all_receivers(self, list):
+        receivers = []
+        for i, line in enumerate(list):
+            if i == 0:
+                line = self.clean_line(line)
+            else:
+                line = self.remove_symbols(line)
+                line = line.lstrip()
+            if self.is_more_receiver_lines(line):
+                end = False
+                line = line[:-1]
+            else:
+                end = True
+            line_receivers = self.get_receivers_from_line(line)
+            receivers += line_receivers
+            if end:
+                return receivers
+
+
+    def clean_line(self, line):
+        line = self.remove_symbols(line)
+        line = self.remove_prefix(line)
+        return line
+
+    def remove_symbols(self, a_string):
+        a_string = a_string.rstrip('\n')
+        a_string = a_string.strip('\t')
+        return a_string
+
+    def is_more_receiver_lines(self, line):
+        return line.endswith(",")
+
     def get_msg_id(self, a_string):
-        id_substring = "Message-ID"
-        if id_substring in a_string:
-            return "".join([i for i in a_string if i.isdigit()])
+        return "".join([i for i in a_string if i.isdigit()])
 
     def get_sender(self, a_string):
-        sender_substring = "From:"
-        L = len(sender_substring)
-        sender = self.remove_prefix(a_string, L)
-        if sender_substring in a_string:
-            sender_name = self.valid_address(sender)
-            if sender_name:
-                return sender_name
+        if self.address_is_valid(a_string):
+            return self.remove_email_address(a_string)
 
-    def get_receivers(self, receiver_str):
+
+    def get_receivers_from_line(self, receiver_str):
         """Find all recipients of an email
 
             Args:
@@ -142,27 +175,22 @@ class EmailReader:
                 TypeError: if receiver_str is not a string.
 
         """
-        receiver_substring = "To:"
         receivers = []
-        if receiver_str.startswith(receiver_substring):
-            K = len(receiver_substring)
-            a_string = self.remove_prefix(receiver_str, K)
-            all_receivers = a_string.split(",") #
-            for receiver in all_receivers:
-                receiver_name = self.valid_address(receiver)
-                if receiver_name:
-                    receivers.append(receiver_name)
+        all_receivers = receiver_str.split(",") #
+        for receiver in all_receivers:
+            receiver = receiver.replace(" ", "")
+            if self.address_is_valid(receiver):
+                receiver = self.remove_email_address(receiver)
+                receivers.append(receiver)
         return receivers
 
-    def valid_address(self, a_string):
-        valid = False
-        a_string = self.remove_punctuation(a_string)
-        if self.is_enron_email(a_string):
-            a_string = self.remove_email_address(a_string)  # self.get_email_address(receiver)
-            if self.matches_regex(a_string):
-                valid = True
-        if valid:
-            return a_string
+    def address_is_valid(self, a_string):
+        email_suffix = "@enron.com"
+        if a_string.endswith(email_suffix):
+            temp = self.remove_email_address(a_string)
+            if self.matches_regex(temp):
+                return True
+        return False
 
     def is_enron_email(self, a_str):
         """Helper fucntion to checks if a string is a valid Enron address
@@ -184,8 +212,14 @@ class EmailReader:
             return True
         return False
 
-    def remove_prefix(self, a_string, N):
-        return a_string.replace(" ", "")[N:]
+    def remove_suffix(self, a_string, N):
+        return a_string.replace(" ", "")[:N]
+
+    def remove_prefix(self, a_string):
+        for i, char in enumerate(a_string):
+            if char == " ":
+                return a_string.replace(" ", "")[i:]
+
 
     def remove_punctuation(self, a_string):
         """Helper function to remove punctuation from string
@@ -249,20 +283,27 @@ class EmailContainer:
             output.write("\n")
 
 
-start = time.time()
-my_directory = "C:\\Users\\Valued Customer\\Desktop\\maildir"
-group_output = open("output.txt", 'w')
-directory_processor = DirectoryProcessor()
-directory_processor.process_files(my_directory)
-parser = directory_processor.parser
-emails = parser.email_container
-groups = parser.groups
-output = open("test_output.txt", 'w')
-emails.write_to_file(output)
-groups.write_statistics_to_file(output)
-end = time.time()
-print(end - start)
 
+def main():
+    start = time.time()
+    my_directory = "C:\\Users\\Valued Customer\\Desktop\\maildir"
+    group_output = open("output.txt", 'w')
+    directory_processor = DirectoryProcessor()
+    directory_processor.process_files(my_directory)
+    parser = directory_processor.parser
+    emails = parser.enron_parser.email_container
+    groups = parser.groups
+    output = open("test_output.txt", 'w')
+    emails.write_to_file(output)
+    groups.write_all_to_file(group_output)
+    groups.write_statistics_to_file(output)
+    end = time.time()
+    print(end - start)
+
+
+
+if __name__ == "__main__":
+    main()
 
 
 

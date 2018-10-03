@@ -91,6 +91,11 @@ class Groups:
     def triad_count(self):
         return self.groups_of_size(3)
 
+    def write_all_to_file(self, output):
+        for el in self.elements:
+            group = self.elements[el]
+            group.write_to_file(output)
+
     def write_statistics_to_file(self, output):
         output.write("Dyad count: " + str(self.dyad_count()))
         output.write("\n")
