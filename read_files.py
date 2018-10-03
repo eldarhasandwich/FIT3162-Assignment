@@ -8,7 +8,7 @@ class DirectoryProcessor:
     def __init__(self):
         self.parser = Parser()
         self.file_count = 0
-        self.file_limit = 500#math.inf
+        self.file_limit = math.inf
 
     def process_files(self, a_directory):
         """Iterate through a given directory and pass each directory file to the parser.
@@ -34,7 +34,7 @@ class DirectoryProcessor:
                     else:
                         end_iteration = True
                         break
-        print(self.file_count)
+
 
 
 class Parser:
@@ -207,13 +207,9 @@ class EmailReader:
 
 
     def matches_regex(self, a_string):
-        m = re.search(r"^[a-z]+([.])[a-z]+$", a_string)
-        if m:
+        if re.match(r"[a-z]+.*([.])[a-z]+$", a_string):
             return True
         return False
-
-    def remove_suffix(self, a_string, N):
-        return a_string.replace(" ", "")[:N]
 
     def remove_prefix(self, a_string):
         for i, char in enumerate(a_string):
