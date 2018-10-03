@@ -1,10 +1,14 @@
 import math, os, re, string, time
+from groups import Groups
 
 class DirectoryProcessor:
+    """ Processes the files of a passed in directory.
+
+    """
     def __init__(self):
         self.parser = Parser()
         self.file_count = 0
-        self.file_limit = 25000
+        self.file_limit = math.inf
 
     def process_files(self, a_directory):
         """Iterate through a given directory and pass each directory file to the parser.
@@ -16,14 +20,22 @@ class DirectoryProcessor:
                 ValueError: if n is negative.
 
         """
+        end_iteration = False
         if os.path.exists(a_directory): #check that the directory exists locally
             file_type = "enron"
             for dir_name, subdir, file_list in os.walk(a_directory):
-                if self.file_count < self.file_limit:
-                    for file in file_list:
+                if end_iteration:
+                    break
+                for file in file_list:
+                    if self.file_count < self.file_limit:
                         self.file_count += 1
                         file_location = str(dir_name + "\\" + file)
                         self.parser.process_file(file_location, file_type) #pass the file to the parser
+                    else:
+                        end_iteration = True
+                        break
+        print(self.file_count)
+
 
 class Parser:
     def __init__(self):
@@ -222,10 +234,10 @@ class EmailContainer:
             return False
         return True
 
-    def add_email(self, sender, receivers, id):
-        email = Email(sender, receivers, id)
-        if self.email_is_unique(id):
-            self.unique_ids[id] = True
+    def add_email(self, sender, receivers, email_id):
+        email = Email(sender, receivers, email_id)
+        if self.email_is_unique(email_id):
+            self.unique_ids[email_id] = True
             self.unique_emails.append(email)
         else:
             self.duplicate_emails.append(email)
@@ -235,114 +247,6 @@ class EmailContainer:
             email_string = email.output_string()
             output.write(email_string)
             output.write("\n")
-
-#group class, stores information about communication flows between recurring clusters of employees
-#currently only utilising this class for dyad/tryad counts
-class Group:
-    def __init__(self, sender, receivers):
-        self.sorted_members = sorted([sender] + receivers)
-        self.initial_sender = sender
-        self.initial_receivers = receivers
-        self.id_dict = self.construct_id_dict()
-        self.adj_list = self.cons_adj_list()
-        self.add_initial_values()
-
-    def construct_id_dict(self):
-        a_dict = {}
-        for i, member in enumerate(self.sorted_members):
-            a_dict[member] = i
-        return a_dict
-
-    def cons_adj_list(self):
-        adj_list = {}
-        for i in self.sorted_members:
-            adj_list[i] = []
-            for j in self.sorted_members:
-                adj_list[i].append((j, 0))
-        return adj_list
-
-    def add_initial_values(self):
-        sender = ''.join(self.initial_sender)
-        for index, key in enumerate(self.sorted_members):
-            if key != sender:
-                val = (key, 1)
-                self.adj_list[sender][index] = val
-
-    def group_exists(self, group):
-        sender = group.initial_sender
-        receivers = group.initial_receivers
-        for receiver in receivers:
-            index = self.id_dict[receiver]
-            values = self.adj_list[sender]
-            val = values[index]
-            val_string = val[0]
-            new_val_number = val[1] + 1
-            new_val = (val_string, new_val_number)
-            self.adj_list[sender][index] = new_val
-
-    def write_to_file(self, output):
-        output.write("Emails sent exclusively between the group of" + self.dictionary_key())
-        output.write("\n")
-        for vertex in self.adj_list:
-            vertex = vertex.strip()
-            for edge in self.adj_list[vertex]:
-                if edge:
-                    edge_string = edge[0]
-                    edge_string = edge_string.strip()
-                    if vertex != edge_string:
-                        edge_val = edge[1]
-                        output.write(vertex +" sent " + str(edge_val) + " to " + str(edge_string))
-                        output.write("\n")
-        output.write("\n")
-
-    def number_of_members(self):
-        return len(list(self.adj_list))
-
-    def dictionary_key(self):
-        my_str = " "
-        for e in self.sorted_members:
-            my_str += str(e) + ", "
-        return my_str[:-2]
-
-
-#container class for group objects
-class Groups:
-    def __init__(self):
-        self.elements = {}
-        self.sizes = {}
-        self.count = 0
-
-    #provided a list of members
-    def add(self, sender, receivers):
-        new_group = Group(sender, receivers)
-        N = len(receivers) + 1
-        if N not in self.sizes:
-            self.sizes[N] = 1
-        else:
-            self.sizes[N] += 1
-        key = new_group.dictionary_key()
-        if key not in self.elements:
-            self.count += 1
-            self.elements[key] = new_group
-        else:
-            self.elements[key].group_exists(new_group)
-
-    def groups_of_size(self, N):
-        if self.sizes[N]:
-            return self.sizes[N]
-        else:
-            return 0
-
-    def dyad_count(self):
-        return self.groups_of_size(2)
-
-    def triad_count(self):
-        return self.groups_of_size(3)
-
-    def write_statistics_to_file(self, output):
-        output.write("Dyad count: " + str(self.dyad_count()))
-        output.write("\n")
-        output.write("Triad count: " + str(self.triad_count()))
 
 
 start = time.time()
