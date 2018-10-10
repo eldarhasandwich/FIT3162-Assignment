@@ -1,6 +1,6 @@
-from read_files import EmailReader
+from read_files import EnronFileReader
 
-my_reader = EmailReader()
+my_reader = EnronFileReader()
 
 def test_sender():
     senders = ["From: eric.bass", "From: raetta.zadow", "From: enron.announcements"]
