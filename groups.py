@@ -80,7 +80,7 @@ class Groups:
         return my_str[:-2]
 
     def groups_of_size(self, N):
-        if self.sizes[N]:
+        if N in self.sizes:
             return self.sizes[N]
         else:
             return 0
