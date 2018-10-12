@@ -89,20 +89,6 @@ class EnronFileReader:
                 return True
         return False
 
-    def is_enron_email(self, a_str):
-        """Helper fucntion to checks if a string ends with Enron address suffix
-
-            Args:
-                a_str: the string being checked
-            Returns:
-                True if string ends with suffix, else False
-            Raises:
-                TypeError: if a_str is not a string.
-        """
-        email_suffix = "@enron.com"
-        return a_str.endswith(email_suffix)
-
-
     def matches_regex(self, a_string):
         """Checks if string matches the given regular expression
 
@@ -117,20 +103,6 @@ class EnronFileReader:
         if re.match(r"[a-z]+.*([.])[a-z]+$", a_string):
             return True
         return False
-
-    def remove_punctuation(self, a_string):
-        """Helper function to remove punctuation from string
-
-            Args:
-                a_string: the string being checked
-            Returns:
-                the passed in string without punctuation
-            Raises:
-                TypeError: if n is not a number.
-                ValueError: if n is negative.
-
-        """
-        return a_string.translate(string.punctuation)
 
 
     def remove_email_address(self, a_string):
