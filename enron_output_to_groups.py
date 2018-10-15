@@ -1,7 +1,7 @@
-from read_files import Groups
+from dataset_to_textfile import Clusters
 
 group_output = open("group_output.txt", 'w')
-enron_groups = Groups()
+enron_groups = Clusters()
 f = open("enron_output.txt", 'r')
 text = f.read()
 f.close()

@@ -1,110 +1,154 @@
 import re, string
 
 class EnronFileReader:
+    """
+    Contains the logic for extracting nodes from an Enron text file.
+    """
     def __init__(self):
-        self.placeholder = False
+        self.attributes = ["", "", []]
+        self.invalid_strings = {"enron": True, "mail": True, "all": True, "outlook": True}
 
-    def get_email_attributes(self, email_location):
-        """Search for the essential attributes of an Enron email.
-
-            Args:
-                email: the file within Enron directory.
-            Returns:
-                sender, receiver(s) and msg_id which are strings (if they are found, else these are None)
-                group_members, a list of all enron employees
-            Raises:
-                TypeError: if n is not a number.
-                ValueError: if n is negative.
-
+    def find_and_store_file_attributes(self, file_location):
         """
-        sender, receivers, msg_id = None, None, None
+        Iterate through each line in an Enron file to find the message id,
+        source node and sink nodes.
+
+        @type  file_location: str
+        @param file_location: The location of a given Enron text file.
+        """
         elements = []
-        i = 0
-        with open(email_location, "r") as f:
-            for line in f:
-                line = line.lstrip()
-                line = line.rstrip('\n')
+        with open(file_location, "r") as f:
+            for i, line in enumerate(f):
+                line = line.strip()
+                a_string = line.replace('\t', "")
                 if i == 0:
-                    msg_id = self.get_msg_id(line)
-                elif i == 1:
-                    pass
+                    self.attributes[0] = a_string
                 elif i == 2:
-                    sender = self.get_sender(line)
+                    self.attributes[1] = self.find_source_node(a_string)
                 elif i >= 3:
-                    elements.append(line)
-                    if line.endswith(','):
-                        pass
-                    else:
-                        receivers = self.get_all_receivers(elements)
-                        break
-                i += 1
+                    line_valid = True
+                    if i == 3:
+                        if not a_string.startswith('To:'):
+                            line_valid = False
+                        else:
+                            a_string = a_string[4:]
+                    if line_valid:
+                        elements.append(a_string)
+                    if not a_string.endswith(','):
+                        self.attributes[2] = self.get_valid_sink_nodes(elements)
+                        return
 
-        return sender, receivers, msg_id
+
+    def edge_is_valid(self):
+        """
+        Iterate through attribute variable of object to
+        ensure all attributes have length > 0
+        """
+        for attr in self.attributes:
+            if len(attr) == 0:
+                return False
+        return True
 
 
-    def get_all_receivers(self, receiver_list):
-        receivers = []
-        for i, line in enumerate(receiver_list):
-            if i == 0:
-                line = line[4:]
-            line_receivers = self.get_receivers_from_line(line)
-            receivers += line_receivers
+    def get_valid_sink_nodes(self, sink_node_list):
+        """
+        Iterate through each string in a passed in list.
+        Look for all valid sink nodes in each string.
 
-        return receivers
+        @type  sink_node_list: list
+        @param sink_node_list: The location of a given Enron text file.
+        """
+        sink_nodes = []
+        for i, line in enumerate(sink_node_list):
+            nodes_from_line = self.get_enron_addresses_from_line(line)
+            sink_nodes += nodes_from_line
+        return sink_nodes
 
-    def get_msg_id(self, a_string):
-        return "".join([i for i in a_string if i.isdigit()])
 
-    def get_sender(self, a_string):
+    def find_source_node(self, a_string):
+        """
+        Look for an Enron source node in a given string.
+
+        @type  a_string: str
+        @param a_string: A line from Enron text file possibly containing a source node.
+        """
         prefix = len("From: ")
-        sender = a_string[prefix:]
-        if self.address_is_valid(sender):
-            return self.remove_email_address(sender)
+        source_node = a_string[prefix:]
+        if self.address_is_valid(source_node):
+            return self.remove_email_suffix(source_node)
+        else:
+            return ""
 
 
-    def get_receivers_from_line(self, receiver_str):
-        receivers = []
-        all_receivers = receiver_str.split(",") #
-        for receiver in all_receivers:
-            receiver = receiver.replace(" ", "")
-            if self.address_is_valid(receiver):
-                receiver = self.remove_email_address(receiver)
-                receivers.append(receiver)
-        return receivers
+    def get_enron_addresses_from_line(self, a_line):
+        """
+        Find all the valid enron addresses in a given string.
+        Return as a list.
+
+        @type  a_line: str
+        @param a_line: A line from Enron text file possibly containing zero or more valid enron addresses.
+
+        @rtype: list
+        @return: A list of valid Enron addresses.
+        """
+        sink_nodes = []
+        line_values = a_line.split(",") #
+        for node in line_values:
+            node = node.replace(" ", "")
+            if self.address_is_valid(node):
+                node = self.remove_email_suffix(node)
+                sink_nodes.append(node)
+        return sink_nodes
 
     def address_is_valid(self, a_string):
-        """Check if an email address is a valid enron address
-            Args:
-                a_string: a string representing a potentially valid email address
-            Returns:
-                True if the address matches the criteria, else False
-            Raises:
-                TypeError: if a_string is not a string
-
         """
+        Check if a given string matches the valid Enron address pattern.
+
+        @type  a_string: str
+        @param a_string: An email address being checked against criteria.
+
+        @rtype: bool
+        @return: True if the string is valid, else False
+        """
+        is_valid = False
+        strings = []
         email_suffix = "@enron.com"
         if a_string.endswith(email_suffix):
-            temp = self.remove_email_address(a_string)
-            if self.matches_regex(temp):
-                return True
-        return False
+            a_string = self.remove_email_suffix(a_string)
+            if '.' in a_string:
+                i = a_string.find('.')
+                string_before_dot = a_string[:i]
+                strings.append(string_before_dot)
+                j = i + 1
+                string_after_dot = a_string[j:]
+                strings.append(string_after_dot)
 
-    def matches_regex(self, a_string):
-        """Checks if string matches the given regular expression
+        if len(strings) == 2:
+            for i, a_string in enumerate(strings):
+                if a_string in self.invalid_strings or any(i.isdigit() for i in a_string):
+                    return False
+                if i == 1:
+                    if '.' in a_string:
+                        return False
+            is_valid = True
+        return is_valid
 
-            Args:
-                a_string: the string being checked against regex
-            Returns:
-                True if the string matches, else False
-            Raises:
-                TypeError: if a_string is not a string
 
+
+
+    def remove_email_suffix(self, a_string):
         """
-        if re.match(r"[a-z]+.*([.])[a-z]+$", a_string):
-            return True
-        return False
+        Helper function to exclude email address from
+        end of a passed in string.
 
+        @type  a_string: str
+        @param a_string: An email address
 
-    def remove_email_address(self, a_string):
+        @rtype: str
+        @return: The passed in string with its email identifier removed.
+        """
         i = a_string.find("@")
         return a_string[:i]
+
+
+

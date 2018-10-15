@@ -1,4 +1,4 @@
-from read_files import EnronFileReader
+from dataset_to_textfile import EnronFileReader
 
 my_reader = EnronFileReader()
 
@@ -14,7 +14,7 @@ def test_receivers():
                           "yamamura.alan@enron.com, belavielle@enron.com"]
 
 
-    assert my_reader.get_all_receivers(receivers) == ['myers.je', 'heinecke.justin', 'john.suarez',
+    assert my_reader.get_valid_sink_nodes(receivers) == ['myers.je', 'heinecke.justin', 'john.suarez',
                                                      'stanton.scott', 'vaccaro.john', 'yamamura.alan']
 
 
