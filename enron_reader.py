@@ -5,10 +5,9 @@ class EnronFileReader:
     Contains the logic for extracting nodes from an Enron text file.
     """
     def __init__(self):
-        self.attributes = ["", "", []]
         self.invalid_strings = {"enron": True, "mail": True, "all": True, "outlook": True}
 
-    def find_and_store_file_attributes(self, file_location):
+    def find_attributes(self, file_location):
         """
         Iterate through each line in an Enron file to find the message id,
         source node and sink nodes.
@@ -16,39 +15,36 @@ class EnronFileReader:
         @type  file_location: str
         @param file_location: The location of a given Enron text file.
         """
+        line_valid = True
+        attributes = []
         elements = []
         with open(file_location, "r") as f:
             for i, line in enumerate(f):
                 line = line.strip()
                 a_string = line.replace('\t', "")
                 if i == 0:
-                    self.attributes[0] = a_string
+                    attributes.append(a_string)
                 elif i == 2:
-                    self.attributes[1] = self.find_source_node(a_string)
+                    source_node = self.find_source_node(a_string)
+                    if source_node:
+                        attributes.append(source_node)
                 elif i >= 3:
-                    line_valid = True
-                    if i == 3:
-                        if not a_string.startswith('To:'):
-                            line_valid = False
-                        else:
-                            a_string = a_string[4:]
                     if line_valid:
-                        elements.append(a_string)
-                    if not a_string.endswith(','):
-                        self.attributes[2] = self.get_valid_sink_nodes(elements)
-                        return
-
-
-    def edge_is_valid(self):
-        """
-        Iterate through attribute variable of object to
-        ensure all attributes have length > 0
-        """
-        for attr in self.attributes:
-            if len(attr) == 0:
-                return False
-        return True
-
+                        if i == 3:
+                            if a_string.startswith('To: '): #check first line is valid
+                                elements.append(a_string[4:])
+                            else:
+                                line_valid = False
+                        else:
+                            elements.append(a_string)
+                            if not a_string.endswith(','):
+                                sink_nodes = self.get_valid_sink_nodes(elements)
+                                if len(sink_nodes) > 0:
+                                    attributes.append(sink_nodes)
+                                line_valid = False
+                    else:
+                        break
+        return attributes
 
     def get_valid_sink_nodes(self, sink_node_list):
         """
@@ -61,7 +57,8 @@ class EnronFileReader:
         sink_nodes = []
         for i, line in enumerate(sink_node_list):
             nodes_from_line = self.get_enron_addresses_from_line(line)
-            sink_nodes += nodes_from_line
+            if len(nodes_from_line) > 0:
+                sink_nodes += nodes_from_line
         return sink_nodes
 
 
@@ -71,6 +68,9 @@ class EnronFileReader:
 
         @type  a_string: str
         @param a_string: A line from Enron text file possibly containing a source node.
+
+        @rtype: str
+        @return: An Enron address if it is valid, else an empty string.
         """
         prefix = len("From: ")
         source_node = a_string[prefix:]

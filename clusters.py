@@ -182,6 +182,5 @@ class Clusters:
         output.write("Dyad count: " + str(self.dyad_count()))
         output.write("\n")
         output.write("Triad count: " + str(self.triad_count()))
-        output.write("\n")
-        output.write("Duplicates: " + str(self.number_of_duplicates()))
+
 

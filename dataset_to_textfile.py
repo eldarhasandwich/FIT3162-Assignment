@@ -15,7 +15,7 @@ class EnronParser:
         self.enron_file_reader = EnronFileReader()
         self.edge_container = EdgeContainer()
         self.file_count = 0
-        self.file_limit = 25000#math.inf
+        self.file_limit = math.inf
         self.message_ids = {}
 
     def process_directory(self):
@@ -48,13 +48,15 @@ class EnronParser:
         @param file: The location of an Enron file.
         """
         file_reader = self.enron_file_reader
-        file_reader.find_and_store_file_attributes(file)
-        if file_reader.edge_is_valid():
-            message_id = file_reader.attributes[0]
-            source_node = file_reader.attributes[1]
-            sink_nodes = file_reader.attributes[2]
-            self.edge_container.add_edge(source_node, sink_nodes)
-            if message_id not in self.message_ids:
+        attributes = file_reader.find_attributes(file)
+        if len(attributes) == 3:
+            message_id = attributes[0]
+            if message_id not in self.message_ids: #check message_id to safeguard duplicate emails
+                self.message_ids[message_id] = True
+                source_node = attributes[1]
+                sink_nodes = attributes[2]
+                self.edge_container.add_edge(source_node, sink_nodes)
+            else:
                 self.message_ids[message_id] = True
 
 class WikiVoteParser:
@@ -147,8 +149,8 @@ class Edge:
     @param sink_nodes: A list containing strings of each sink node.
     """
     def __init__(self, source_node, sink_nodes):
-        self.start_node = source_node
-        self.end_nodes = sink_nodes
+        self.source_node = source_node
+        self.sink_nodes = sink_nodes
 
 
     def output_string(self):
@@ -160,11 +162,11 @@ class Edge:
         @return:  A string in the form of
                   {source_node} to {sink_node_one}, {sink_node_two}...
         """
-        a_str = "{0} to ".format(self.start_node)
-        for r in range(0, len(self.end_nodes) - 1):
-            a_sink_node = self.end_nodes[r]
+        a_str = "{0} to ".format(self.source_node)
+        for r in range(0, len(self.sink_nodes) - 1):
+            a_sink_node = self.sink_nodes[r]
             a_str += a_sink_node+", "
-        a_str += self.end_nodes[-1]
+        a_str += self.sink_nodes[-1]
         return a_str
 
 
@@ -202,6 +204,7 @@ class EdgeContainer:
             edge_string = edge.output_string()
             output.write(edge_string)
             output.write("\n")
+        self.clusters.write_statistics_to_file(output)
 
 
 def main():
@@ -237,11 +240,9 @@ def main():
         print("Invalid input. Please select a number from 1-3.")
         return
     edges = parser.edge_container
-    groups = edges.clusters
-    graph_input = "graph_input.txt"
+    graph_input = "C:\\Users\\Valued Customer\\Desktop\\enron_output.txt" ######
     with io.open(graph_input, "w", encoding="utf-8") as f:
         edges.write_to_file(f)
-        groups.write_statistics_to_file(f)
 
 
 if __name__ == "__main__":
